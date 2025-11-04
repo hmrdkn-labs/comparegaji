@@ -81,29 +81,42 @@
 
 .view-toggle {
     display: inline-flex;
-    padding: 4px;
-    background: rgba(17, 17, 17, 0.05);
+    align-items: center;
+    padding: 0.25rem;
+    background: rgba(17, 17, 17, 0.07);
     border-radius: 999px;
-    gap: 4px;
+    gap: 0.25rem;
 }
 
 .view-toggle button {
     border: none;
-    padding: 0.4rem 0.9rem;
+    padding: 0.45rem 1rem;
     border-radius: 999px;
     background: transparent;
     color: var(--color-subtle-text);
     cursor: pointer;
+    font-weight: 600;
     transition:
         background 160ms ease,
         color 160ms ease,
-        box-shadow 160ms ease;
+        box-shadow 160ms ease,
+        transform 120ms ease;
 }
 
-.view-toggle button[aria-pressed="true"] {
+.view-toggle button:hover {
+    background: rgba(17, 17, 17, 0.12);
+    color: var(--color-text);
+}
+
+.view-toggle button:focus-visible {
+    outline: 2px solid var(--color-accent-blue);
+    outline-offset: 2px;
+}
+
+.view-toggle button[aria-pressed='true'] {
     background: var(--color-accent-blue);
     color: #fff;
-    box-shadow: 0 6px 14px rgba(66, 133, 244, 0.35);
+    box-shadow: 0 8px 18px rgba(66, 133, 244, 0.32);
 }
 
 .filter-row {
@@ -157,6 +170,12 @@
     opacity: 0.5;
 }
 
+.band-helper {
+    font-size: 0.85rem;
+    color: var(--color-subtle-text);
+    margin-left: auto;
+}
+
 .pill-select {
     display: inline-flex;
     align-items: center;
@@ -177,6 +196,10 @@
     padding-right: 1.4rem;
     appearance: none;
     cursor: pointer;
+}
+
+.pill-select--wide select {
+    min-width: 200px;
 }
 
 .pill-select select:focus {
@@ -302,12 +325,16 @@
 }
 
 .hero-controls .view-toggle {
-  background: rgba(17, 17, 17, 0.08);
+  background: rgba(17, 17, 17, 0.05);
+}
+
+.hero-controls .view-toggle button {
+  min-width: 86px;
 }
 
 .hero-controls .view-toggle button[aria-pressed='true'] {
   background: var(--color-accent-green);
-  box-shadow: 0 6px 14px rgba(15, 157, 88, 0.35);
+  box-shadow: 0 10px 22px rgba(15, 157, 88, 0.35);
 }
 
 .table-card {

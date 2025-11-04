@@ -83,8 +83,8 @@ export function getCadenceLabel(language: LanguageCode, cadence: Cadence) {
   return map[cadence];
 }
 
-export function getCountriesByBand(data: SalaryEntry[], band?: Band) {
-  if (!band) {
+export function getCountriesByBand(data: SalaryEntry[], band?: Band | "All") {
+  if (!band || band === "All") {
     return data;
   }
 
@@ -136,6 +136,11 @@ export function getBandDistributions(data: SalaryEntry[]): BandDistribution[] {
   }
 
   return result;
+}
+
+export function getBandDistribution(data: SalaryEntry[], band: Band) {
+  const distributions = getBandDistributions(data);
+  return distributions.find((distribution) => distribution.band === band) ?? null;
 }
 
 export function convertSalary(

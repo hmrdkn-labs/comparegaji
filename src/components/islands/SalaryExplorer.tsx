@@ -53,6 +53,13 @@ interface TranslationShape {
       emptyState: string;
       footnoteCountries: string;
       footnoteBands: string;
+      rangeLabels: {
+        min: string;
+        max: string;
+      };
+      compareLabel: string;
+      comparePlaceholder: string;
+      benchmarkLabel: string;
     };
   };
   comparison: {
@@ -132,10 +139,17 @@ const translations: Record<LanguageCode, TranslationShape> = {
         countriesLabel: "Countries",
         bandsLabel: "Bands",
         bandFilterLabel: "Band filter",
-        bandHelper: "Comparing averages per band",
+        bandHelper: "Benchmark (Indonesia) is always shown. Pick a country in this band to compare.",
         emptyState: "No countries available for the selected band.",
         footnoteCountries: "Salary values shown in %currency% (%cadence%).",
-        footnoteBands: "Shaded area shows band range (min–max). Values in %currency% (%cadence%).",
+        footnoteBands: "Benchmark line (Indonesia) plus minimum and maximum lines are shown in %currency% (%cadence%).",
+        rangeLabels: {
+          min: "%band% minimum",
+          max: "%band% maximum",
+        },
+        compareLabel: "Compare a country",
+        comparePlaceholder: "Optional country in this band",
+        benchmarkLabel: "Benchmark (Indonesia)",
       },
     },
     comparison: {
@@ -215,10 +229,17 @@ const translations: Record<LanguageCode, TranslationShape> = {
         countriesLabel: "Negara",
         bandsLabel: "Band",
         bandFilterLabel: "Filter band",
-        bandHelper: "Menampilkan rata-rata tiap band",
+        bandHelper: "Benchmark (Indonesia) selalu tampil. Pilih negara di band ini untuk dibandingkan.",
         emptyState: "Tidak ada negara untuk band yang dipilih.",
         footnoteCountries: "Seluruh nilai dalam %currency% (%cadence%).",
-        footnoteBands: "Area berwarna menunjukkan rentang band (minimum–maksimum) dalam %currency% (%cadence%).",
+        footnoteBands: "Garis benchmark (Indonesia) beserta batas bawah dan atas band ditampilkan dalam %currency% (%cadence%).",
+        rangeLabels: {
+          min: "%band% terendah",
+          max: "%band% tertinggi",
+        },
+        compareLabel: "Bandingkan negara",
+        comparePlaceholder: "Negara opsional dalam band ini",
+        benchmarkLabel: "Benchmark (Indonesia)",
       },
     },
     comparison: {
@@ -348,6 +369,10 @@ const SalaryExplorer = ({ data, exchangeRate = USD_TO_IDR }: SalaryExplorerProps
       emptyState: t.lineChart.copy.emptyState,
       footnoteCountries: t.lineChart.copy.footnoteCountries,
       footnoteBands: t.lineChart.copy.footnoteBands,
+      rangeLabels: t.lineChart.copy.rangeLabels,
+      compareLabel: t.lineChart.copy.compareLabel,
+      comparePlaceholder: t.lineChart.copy.comparePlaceholder,
+      benchmarkLabel: t.lineChart.copy.benchmarkLabel,
     };
   }, [t.lineChart.copy]);
 
