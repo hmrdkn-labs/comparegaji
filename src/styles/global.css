@@ -258,7 +258,22 @@
 }
 
 .hero-summary {
-    margin-top: 2rem;
+  margin-top: 2rem;
+}
+
+.hero-controls {
+  margin-top: 1.75rem;
+  align-items: center;
+  gap: 1.5rem;
+}
+
+.hero-controls .view-toggle {
+  background: rgba(17, 17, 17, 0.08);
+}
+
+.hero-controls .view-toggle button[aria-pressed='true'] {
+  background: var(--color-accent-green);
+  box-shadow: 0 6px 14px rgba(15, 157, 88, 0.35);
 }
 
 .table-card {

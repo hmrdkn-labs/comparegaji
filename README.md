@@ -1,7 +1,8 @@
 # ID Career Compare
 
-An Astro site with React islands that visualise Indonesia&apos;s product salary benchmarks against key global markets. The experience focuses on three interactive sections:
+An Astro site with React islands that visualise Indonesia&apos;s product salary benchmarks against key global markets. The experience now includes global view controls and three interactive sections:
 
+- currency (USD vs IDR) and cadence (annual vs monthly) toggles that update every visualisation in real time
 - multi-country line chart that tracks salary growth across junior, middle, and senior roles
 - Indonesia vs. single-market bar comparison with percentage deltas
 - sortable, filterable data table with CSV export for deeper analysis
@@ -18,6 +19,7 @@ An Astro site with React islands that visualise Indonesia&apos;s product salary 
 src/
   components/
     islands/
+      SalaryExplorer.tsx
       CountryComparisonChart.tsx
       MultiCountryLineChart.tsx
       SalaryTable.tsx
@@ -26,7 +28,7 @@ src/
   layouts/
     Layout.astro         // global shell, typography, palette variables
   pages/
-    index.astro          // main page composed of the interactive sections
+    index.astro          // renders the SalaryExplorer island within the global layout
   styles/
     global.css           // shared tokens and component-level styling
 ```

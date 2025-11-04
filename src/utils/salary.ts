@@ -18,6 +18,21 @@ export const bandOrder: Band[] = [
   "Top Band",
 ];
 
+export type CurrencyCode = "USD" | "IDR";
+export type Cadence = "annual" | "monthly";
+
+export const cadenceLabels: Record<Cadence, string> = {
+  annual: "Annual",
+  monthly: "Monthly",
+};
+
+export const USD_TO_IDR = 15500;
+
+export const currencyLabels: Record<CurrencyCode, string> = {
+  USD: "USD",
+  IDR: "IDR",
+};
+
 export function getCountriesByBand(data: SalaryEntry[], band?: Band) {
   if (!band) {
     return data;
@@ -63,18 +78,38 @@ export function getBandAverages(data: SalaryEntry[]): BandAverage[] {
   return result;
 }
 
-export function formatCurrency(value: number) {
+export function convertSalary(
+  valueAnnualUSD: number,
+  currency: CurrencyCode,
+  cadence: Cadence,
+  exchangeRate = USD_TO_IDR,
+) {
+  let amount = valueAnnualUSD;
+  if (cadence === "monthly") {
+    amount = amount / 12;
+  }
+
+  if (currency === "IDR") {
+    amount = amount * exchangeRate;
+  }
+
+  return amount;
+}
+
+export function formatCurrency(value: number, currency: CurrencyCode) {
   return new Intl.NumberFormat("en-US", {
     style: "currency",
-    currency: "USD",
+    currency,
     maximumFractionDigits: 0,
   }).format(value);
 }
 
-export function formatCompact(value: number) {
+export function formatAxisValue(value: number, currency: CurrencyCode) {
   return new Intl.NumberFormat("en-US", {
+    style: "currency",
+    currency,
     notation: "compact",
-    maximumFractionDigits: 1,
+    maximumFractionDigits: currency === "USD" ? 1 : 1,
   }).format(value);
 }
 

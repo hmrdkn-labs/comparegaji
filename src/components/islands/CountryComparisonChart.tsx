@@ -11,17 +11,30 @@ import {
 } from "recharts";
 import type { SalaryEntry } from "../../data/salaryData";
 import {
-  formatCompact,
+  cadenceLabels,
+  convertSalary,
+  currencyLabels,
+  formatAxisValue,
   formatCurrency,
   seniorityLabels,
   seniorityOrder,
+  type Cadence,
+  type CurrencyCode,
 } from "../../utils/salary";
 
 interface CountryComparisonChartProps {
   data: SalaryEntry[];
+  currency: CurrencyCode;
+  cadence: Cadence;
+  exchangeRate?: number;
 }
 
-const CountryComparisonChart = ({ data }: CountryComparisonChartProps) => {
+const CountryComparisonChart = ({
+  data,
+  currency,
+  cadence,
+  exchangeRate,
+}: CountryComparisonChartProps) => {
   const indonesia = data.find((entry) => entry.country === "Indonesia");
   const countries = useMemo(
     () =>
@@ -45,8 +58,18 @@ const CountryComparisonChart = ({ data }: CountryComparisonChartProps) => {
     }
 
     return seniorityOrder.map((level) => {
-      const indonesiaValue = indonesia[level];
-      const targetValue = selectedEntry[level];
+      const indonesiaValue = convertSalary(
+        indonesia[level],
+        currency,
+        cadence,
+        exchangeRate,
+      );
+      const targetValue = convertSalary(
+        selectedEntry[level],
+        currency,
+        cadence,
+        exchangeRate,
+      );
       const delta = targetValue - indonesiaValue;
       const deltaPct = indonesiaValue ? (delta / indonesiaValue) * 100 : 0;
 
@@ -58,28 +81,20 @@ const CountryComparisonChart = ({ data }: CountryComparisonChartProps) => {
         deltaPct,
       };
     });
-  }, [indonesia, selectedEntry]);
+  }, [cadence, currency, exchangeRate, indonesia, selectedEntry]);
 
   if (!indonesia || !countries.length || !selectedEntry) {
     return (
       <div className="card chart-card">
         <strong>Indonesia comparison</strong>
-        <p>
-          We need at least one other country to run a side-by-side comparison.
-        </p>
+        <p>We need at least one other country to run a side-by-side comparison.</p>
       </div>
     );
   }
 
-  const seniorRow = chartData.find(
-    (row) => row.level === seniorityLabels.senior,
-  );
-  const middleRow = chartData.find(
-    (row) => row.level === seniorityLabels.middle,
-  );
-  const juniorRow = chartData.find(
-    (row) => row.level === seniorityLabels.junior,
-  );
+  const seniorRow = chartData.find((row) => row.level === seniorityLabels.senior);
+  const middleRow = chartData.find((row) => row.level === seniorityLabels.middle);
+  const juniorRow = chartData.find((row) => row.level === seniorityLabels.junior);
 
   const formatDelta = (value?: number) => {
     if (value === undefined || !Number.isFinite(value)) {
@@ -90,11 +105,8 @@ const CountryComparisonChart = ({ data }: CountryComparisonChartProps) => {
       return "Even";
     }
 
-    if (value > 0) {
-      return `+${formatCurrency(value)}`;
-    }
-
-    return formatCurrency(value);
+    const formatted = formatCurrency(Math.abs(value), currency);
+    return value > 0 ? `+${formatted}` : `-${formatted}`;
   };
 
   const formatDeltaPct = (value?: number) => {
@@ -119,14 +131,21 @@ const CountryComparisonChart = ({ data }: CountryComparisonChartProps) => {
     return "";
   };
 
+  const tooltipFormatter = (value: number, key: string) => [
+    formatCurrency(value, currency),
+    key,
+  ];
+
+  const axisFormatter = (val: number) => formatAxisValue(val, currency);
+
   return (
     <div className="card chart-card">
       <div className="chart-header">
         <div>
           <strong>Indonesia vs. a target market</strong>
           <p>
-            Select a country to see how Indonesia&apos;s salary benchmarks stack
-            up at each seniority level.
+            Select a country to see how Indonesia&apos;s salary benchmarks stack up at each seniority
+            level in {currencyLabels[currency]} ({cadenceLabels[cadence].toLowerCase()}).
           </p>
         </div>
         <div className="filter-group">
@@ -150,28 +169,12 @@ const CountryComparisonChart = ({ data }: CountryComparisonChartProps) => {
       <div className="chart-wrapper">
         <ResponsiveContainer width="100%" height={380}>
           <BarChart data={chartData} barCategoryGap={24}>
-            <CartesianGrid
-              strokeDasharray="3 3"
-              stroke="rgba(17, 17, 17, 0.15)"
-            />
+            <CartesianGrid strokeDasharray="3 3" stroke="rgba(17, 17, 17, 0.15)" />
             <XAxis dataKey="level" tick={{ fill: "#333", fontSize: 12 }} />
-            <YAxis
-              tickFormatter={formatCompact}
-              tick={{ fill: "#333", fontSize: 12 }}
-              width={90}
-            />
-            <Tooltip
-              formatter={(value: number, key) => [
-                formatCurrency(value as number),
-                key,
-              ]}
-            />
+            <YAxis tickFormatter={axisFormatter} tick={{ fill: "#333", fontSize: 12 }} width={110} />
+            <Tooltip formatter={tooltipFormatter} />
             <Legend wrapperStyle={{ fontSize: "0.85rem" }} />
-            <Bar
-              dataKey="Indonesia"
-              fill="rgba(15, 157, 88, 0.8)"
-              radius={[8, 8, 0, 0]}
-            />
+            <Bar dataKey="Indonesia" fill="rgba(15, 157, 88, 0.8)" radius={[8, 8, 0, 0]} />
             <Bar
               dataKey={selectedEntry.country}
               fill="rgba(66, 133, 244, 0.85)"
@@ -184,17 +187,17 @@ const CountryComparisonChart = ({ data }: CountryComparisonChartProps) => {
       <div className="comparison-summary" aria-live="polite">
         <div className={`summary-card ${classifyDelta(seniorRow?.delta)}`}>
           <strong>Senior gap</strong>
-          <span>{formatDelta(seniorRow?.delta ?? 0)}</span>
+          <span>{formatDelta(seniorRow?.delta)}</span>
           <p>{formatDeltaPct(seniorRow?.deltaPct)}</p>
         </div>
         <div className={`summary-card ${classifyDelta(middleRow?.delta)}`}>
           <strong>Mid-level gap</strong>
-          <span>{formatDelta(middleRow?.delta ?? 0)}</span>
+          <span>{formatDelta(middleRow?.delta)}</span>
           <p>{formatDeltaPct(middleRow?.deltaPct)}</p>
         </div>
         <div className={`summary-card ${classifyDelta(juniorRow?.delta)}`}>
           <strong>Junior gap</strong>
-          <span>{formatDelta(juniorRow?.delta ?? 0)}</span>
+          <span>{formatDelta(juniorRow?.delta)}</span>
           <p>{formatDeltaPct(juniorRow?.deltaPct)}</p>
         </div>
       </div>

@@ -1,85 +1,11 @@
 ---
 import Layout from "../layouts/Layout.astro";
-import MultiCountryLineChart from "../components/islands/MultiCountryLineChart";
-import CountryComparisonChart from "../components/islands/CountryComparisonChart";
-import SalaryTable from "../components/islands/SalaryTable";
+import SalaryExplorer from "../components/islands/SalaryExplorer";
 import { salaryData } from "../data/salaryData";
-
-const heroStats = [
-    {
-        label: "Benchmarked markets",
-        value: `${salaryData.length}+`,
-        tone: "hero",
-    },
-    {
-        label: "Top senior salary",
-        value: "$127,000",
-        tone: "positive",
-    },
-    {
-        label: "Indonesia senior benchmark",
-        value: "$18,750",
-        tone: "negative",
-    },
-];
 ---
 
 <Layout title="Indonesia Career Salary Compare">
-    <main class="page-shell">
-        <section class="hero-card">
-            <h1>Indonesia&apos;s product salary position, at a glance.</h1>
-            <p>
-                Track how Indonesia&apos;s salary benchmarks compare to 20+
-                digital product markets across the globe. Switch between country
-                and band views, pick a target market for one-on-one comparisons,
-                then dive into the raw figures.
-            </p>
-            <div class="comparison-summary hero-summary">
-                {
-                    heroStats.map((stat) => (
-                        <div class={`summary-card summary-card--${stat.tone}`}>
-                            <strong>{stat.label}</strong>
-                            <span>{stat.value}</span>
-                        </div>
-                    ))
-                }
-            </div>
-        </section>
-
-        <section>
-            <div class="section-title">
-                <h2>Growth across seniority</h2>
-                <p>
-                    Compare how salaries scale from junior to senior roles.
-                    Toggle between individual markets or averaged band groupings
-                    to understand which ecosystems accelerate faster.
-                </p>
-            </div>
-            <MultiCountryLineChart client:load data={salaryData} />
-        </section>
-
-        <section>
-            <div class="section-title">
-                <h2>Indonesia vs. the world</h2>
-                <p>
-                    Choose a specific market to benchmark Indonesia against.
-                    Spot gaps at each seniority level and quantify the
-                    percentage difference instantly.
-                </p>
-            </div>
-            <CountryComparisonChart client:load data={salaryData} />
-        </section>
-
-        <section>
-            <div class="section-title">
-                <h2>Inspect the dataset</h2>
-                <p>
-                    Sort and filter the reference table to explore each
-                    country&apos;s benchmark. Export the data if you want to
-                    take it into your own analysis.
-                </p>
-            </div>
-            <SalaryTable client:load data={salaryData} />
-        </section>
-    </main>
+  <main class="page-shell">
+    <SalaryExplorer client:load data={salaryData} />
+  </main>
 </Layout>

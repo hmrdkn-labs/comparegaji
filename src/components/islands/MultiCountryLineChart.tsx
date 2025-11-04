@@ -12,17 +12,25 @@ import {
 import type { SalaryEntry, Band } from "../../data/salaryData";
 import {
   bandOrder,
-  formatCompact,
+  cadenceLabels,
+  convertSalary,
+  currencyLabels,
+  formatAxisValue,
   formatCurrency,
   getBandAverages,
   seniorityLabels,
   seniorityOrder,
+  type Cadence,
+  type CurrencyCode,
 } from "../../utils/salary";
 
 type ViewMode = "countries" | "bands";
 
 interface MultiCountryLineChartProps {
   data: SalaryEntry[];
+  currency: CurrencyCode;
+  cadence: Cadence;
+  exchangeRate?: number;
 }
 
 const defaultCountries = ["Indonesia", "United States", "India", "Singapore"];
@@ -50,17 +58,15 @@ const bandColors: Record<Band, string> = {
   "Top Band": "#F4B400",
 };
 
-const tooltipFormatter = (value: number, name: string) => [
-  formatCurrency(value),
-  name,
-];
-
-const MultiCountryLineChart = ({ data }: MultiCountryLineChartProps) => {
+const MultiCountryLineChart = ({
+  data,
+  currency,
+  cadence,
+  exchangeRate,
+}: MultiCountryLineChartProps) => {
   const initialCountries = useMemo(() => {
     const available = data.map((entry) => entry.country);
-    const seeded = defaultCountries.filter((country) =>
-      available.includes(country),
-    );
+    const seeded = defaultCountries.filter((country) => available.includes(country));
     if (seeded.length) {
       return seeded;
     }
@@ -70,8 +76,7 @@ const MultiCountryLineChart = ({ data }: MultiCountryLineChartProps) => {
 
   const [viewMode, setViewMode] = useState<ViewMode>("countries");
   const [selectedBand, setSelectedBand] = useState<"All" | Band>("All");
-  const [selectedCountries, setSelectedCountries] =
-    useState<string[]>(initialCountries);
+  const [selectedCountries, setSelectedCountries] = useState<string[]>(initialCountries);
 
   const dataByCountry = useMemo(() => {
     return new Map(data.map((entry) => [entry.country, entry]));
@@ -86,18 +91,14 @@ const MultiCountryLineChart = ({ data }: MultiCountryLineChartProps) => {
   }, [data, selectedBand]);
 
   const availableCountries = useMemo(() => {
-    return [...bandFilteredEntries].sort((a, b) =>
-      a.country.localeCompare(b.country),
-    );
+    return [...bandFilteredEntries].sort((a, b) => a.country.localeCompare(b.country));
   }, [bandFilteredEntries]);
 
   useEffect(() => {
     if (viewMode === "countries") {
       const available = availableCountries.map((entry) => entry.country);
       setSelectedCountries((current) => {
-        const filtered = current.filter((country) =>
-          available.includes(country),
-        );
+        const filtered = current.filter((country) => available.includes(country));
         if (filtered.length) {
           return filtered;
         }
@@ -122,7 +123,7 @@ const MultiCountryLineChart = ({ data }: MultiCountryLineChartProps) => {
         };
 
         averages.forEach((average) => {
-          row[average.band] = average[level];
+          row[average.band] = convertSalary(average[level], currency, cadence, exchangeRate);
         });
 
         return row;
@@ -148,7 +149,7 @@ const MultiCountryLineChart = ({ data }: MultiCountryLineChartProps) => {
       selectedCountries.forEach((country) => {
         const entry = dataByCountry.get(country);
         if (entry) {
-          row[country] = entry[level];
+          row[country] = convertSalary(entry[level], currency, cadence, exchangeRate);
         }
       });
 
@@ -159,7 +160,7 @@ const MultiCountryLineChart = ({ data }: MultiCountryLineChartProps) => {
       lines,
       chartData,
     };
-  }, [data, dataByCountry, selectedCountries, viewMode]);
+  }, [cadence, currency, data, dataByCountry, exchangeRate, selectedCountries, viewMode]);
 
   const toggleCountry = (country: string) => {
     setSelectedCountries((current) => {
@@ -172,6 +173,13 @@ const MultiCountryLineChart = ({ data }: MultiCountryLineChartProps) => {
   };
 
   const disabledCountrySelection = viewMode === "bands";
+  const tooltipFormatter = (value: number, name: string) => [
+    formatCurrency(value, currency),
+    name,
+  ];
+
+  const axisFormatter = (val: number) => formatAxisValue(val, currency);
+  const footnote = `Salary values shown in ${currencyLabels[currency]} (${cadenceLabels[cadence].toLowerCase()}).`;
 
   return (
     <div className="card chart-card">
@@ -179,9 +187,8 @@ const MultiCountryLineChart = ({ data }: MultiCountryLineChartProps) => {
         <div>
           <strong>How salaries scale with seniority</strong>
           <p>
-            Visualise how compensation grows from junior to senior roles.
-            Compare individual nations or look at averages by band
-            classification.
+            Visualise how compensation grows from junior to senior roles. Compare individual nations
+            or look at averages by band classification.
           </p>
         </div>
         <div className="view-toggle" role="group" aria-label="Chart view mode">
@@ -210,9 +217,7 @@ const MultiCountryLineChart = ({ data }: MultiCountryLineChartProps) => {
               id="band-filter"
               disabled={viewMode === "bands"}
               value={selectedBand}
-              onChange={(event) =>
-                setSelectedBand(event.target.value as "All" | Band)
-              }
+              onChange={(event) => setSelectedBand(event.target.value as "All" | Band)}
             >
               <option value="All">All bands</option>
               {bandOrder.map((band) => (
@@ -256,24 +261,15 @@ const MultiCountryLineChart = ({ data }: MultiCountryLineChartProps) => {
             </label>
           );
         })}
-        {!availableCountries.length && (
-          <span>No countries available for the selected band.</span>
-        )}
+        {!availableCountries.length && <span>No countries available for the selected band.</span>}
       </div>
 
       <div className="chart-wrapper">
         <ResponsiveContainer width="100%" height={420}>
           <LineChart data={chartConfig.chartData}>
-            <CartesianGrid
-              strokeDasharray="3 3"
-              stroke="rgba(17, 17, 17, 0.15)"
-            />
+            <CartesianGrid strokeDasharray="3 3" stroke="rgba(17, 17, 17, 0.15)" />
             <XAxis dataKey="level" tick={{ fill: "#333", fontSize: 12 }} />
-            <YAxis
-              tickFormatter={formatCompact}
-              tick={{ fill: "#333", fontSize: 12 }}
-              width={90}
-            />
+            <YAxis tickFormatter={axisFormatter} tick={{ fill: "#333", fontSize: 12 }} width={110} />
             <Tooltip formatter={tooltipFormatter} />
             <Legend wrapperStyle={{ fontSize: "0.85rem" }} />
             {chartConfig.lines.map((line) => (
@@ -290,10 +286,7 @@ const MultiCountryLineChart = ({ data }: MultiCountryLineChartProps) => {
           </LineChart>
         </ResponsiveContainer>
       </div>
-      <p className="chart-footnote">
-        Salary values shown in USD. Hover each point to see the exact benchmark
-        at that seniority.
-      </p>
+      <p className="chart-footnote">{footnote}</p>
     </div>
   );
 };
