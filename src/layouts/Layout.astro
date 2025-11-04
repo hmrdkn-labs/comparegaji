@@ -1,22 +1,111 @@
+---
+import "../styles/global.css";
+
+const {
+    title = "ID Career Compare",
+    description = "Explore global salary benchmarks across seniority levels and compare them against Indonesia.",
+} = Astro.props;
+---
+
 <!doctype html>
 <html lang="en">
-	<head>
-		<meta charset="UTF-8" />
-		<meta name="viewport" content="width=device-width" />
-		<link rel="icon" type="image/svg+xml" href="/favicon.svg" />
-		<meta name="generator" content={Astro.generator} />
-		<title>Astro Basics</title>
-	</head>
-	<body>
-		<slot />
-	</body>
+    <head>
+        <meta charset="UTF-8" />
+        <meta name="viewport" content="width=device-width" />
+        <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+        <meta name="generator" content={Astro.generator} />
+        <title>{title}</title>
+        <meta name="description" content={description} />
+    </head>
+    <body>
+        <div class="layout-shell">
+            <slot />
+        </div>
+    </body>
 </html>
 
-<style>
-	html,
-	body {
-		margin: 0;
-		width: 100%;
-		height: 100%;
-	}
+<style is:global>
+    :root {
+        --color-surface: #ffffff;
+        --color-text: #111111;
+        --color-subtle-text: #4a4a4a;
+        --color-border: rgba(17, 17, 17, 0.08);
+        --color-accent-green: #0f9d58;
+        --color-accent-yellow: #f4b400;
+        --color-accent-blue: #4285f4;
+        --color-muted-blue: #c7ddff;
+        --shadow-soft: 0 16px 30px rgba(32, 62, 113, 0.08);
+        --font-sans:
+            "Inter", "Segoe UI", system-ui, -apple-system, BlinkMacSystemFont,
+            "Helvetica Neue", Arial, sans-serif;
+    }
+
+    *,
+    *::before,
+    *::after {
+        box-sizing: border-box;
+    }
+
+    html,
+    body {
+        margin: 0;
+        padding: 0;
+        min-height: 100%;
+        background: var(--color-surface);
+        color: var(--color-text);
+        font-family: var(--font-sans);
+        -webkit-font-smoothing: antialiased;
+    }
+
+    body {
+        font-size: 16px;
+        line-height: 1.6;
+        display: flex;
+        flex-direction: column;
+    }
+
+    .layout-shell {
+        flex: 1;
+        width: 100%;
+    }
+
+    main {
+        display: block;
+    }
+
+    h1,
+    h2,
+    h3 {
+        color: var(--color-text);
+        margin: 0 0 0.5rem;
+        font-weight: 600;
+        line-height: 1.2;
+    }
+
+    p {
+        margin: 0 0 1.25rem;
+        color: var(--color-subtle-text);
+    }
+
+    a {
+        color: var(--color-accent-blue);
+        text-decoration: none;
+    }
+
+    a:hover,
+    a:focus {
+        text-decoration: underline;
+    }
+
+    button,
+    input,
+    select {
+        font-family: inherit;
+    }
+
+    @media (max-width: 720px) {
+        body {
+            font-size: 15px;
+        }
+    }
 </style>
