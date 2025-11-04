@@ -1,17 +1,15 @@
 {
-	"name": "id-career-compare",
+	"name": "comparegaji",
 	"type": "module",
 	"version": "0.0.1",
 	"scripts": {
 		"dev": "astro dev",
 		"build": "astro build",
-		"preview": "astro build && wrangler dev",
+		"preview": "astro preview",
 		"astro": "astro",
-		"deploy": "astro build && wrangler deploy",
-		"cf-typegen": "wrangler types"
+		"deploy": "astro build && wrangler pages deploy dist --project-name=comparegaji"
 	},
 	"dependencies": {
-		"@astrojs/cloudflare": "^12.6.10",
 		"@astrojs/react": "^4.4.1",
 		"astro": "^5.15.3",
 		"react": "^19.2.0",
