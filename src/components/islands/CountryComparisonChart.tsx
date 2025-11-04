@@ -11,21 +11,36 @@ import {
 } from "recharts";
 import type { SalaryEntry } from "../../data/salaryData";
 import {
-  cadenceLabels,
   convertSalary,
-  currencyLabels,
   formatAxisValue,
   formatCurrency,
-  seniorityLabels,
   seniorityOrder,
   type Cadence,
   type CurrencyCode,
+  type SeniorityKey,
 } from "../../utils/salary";
+
+interface CountryComparisonCopy {
+  title: string;
+  description: string;
+  selectLabel: string;
+  optionSeparator: string;
+  noData: string;
+  summaryLabels: {
+    senior: string;
+    middle: string;
+    junior: string;
+  };
+  evenLabel: string;
+  notApplicable: string;
+}
 
 interface CountryComparisonChartProps {
   data: SalaryEntry[];
   currency: CurrencyCode;
   cadence: Cadence;
+  seniorityLabels: Record<SeniorityKey, string>;
+  copy: CountryComparisonCopy;
   exchangeRate?: number;
 }
 
@@ -33,6 +48,8 @@ const CountryComparisonChart = ({
   data,
   currency,
   cadence,
+  seniorityLabels,
+  copy,
   exchangeRate,
 }: CountryComparisonChartProps) => {
   const indonesia = data.find((entry) => entry.country === "Indonesia");
@@ -81,13 +98,13 @@ const CountryComparisonChart = ({
         deltaPct,
       };
     });
-  }, [cadence, currency, exchangeRate, indonesia, selectedEntry]);
+  }, [cadence, currency, exchangeRate, indonesia, selectedEntry, seniorityLabels]);
 
   if (!indonesia || !countries.length || !selectedEntry) {
     return (
       <div className="card chart-card">
-        <strong>Indonesia comparison</strong>
-        <p>We need at least one other country to run a side-by-side comparison.</p>
+        <strong>{copy.title}</strong>
+        <p>{copy.noData}</p>
       </div>
     );
   }
@@ -98,11 +115,11 @@ const CountryComparisonChart = ({
 
   const formatDelta = (value?: number) => {
     if (value === undefined || !Number.isFinite(value)) {
-      return "N/A";
+      return copy.notApplicable;
     }
 
     if (value === 0) {
-      return "Even";
+      return copy.evenLabel;
     }
 
     const formatted = formatCurrency(Math.abs(value), currency);
@@ -111,7 +128,7 @@ const CountryComparisonChart = ({
 
   const formatDeltaPct = (value?: number) => {
     if (value === undefined || !Number.isFinite(value)) {
-      return "N/A";
+      return copy.notApplicable;
     }
     const prefix = value >= 0 ? "+" : "";
     return `${prefix}${value.toFixed(1)}%`;
@@ -142,14 +159,11 @@ const CountryComparisonChart = ({
     <div className="card chart-card">
       <div className="chart-header">
         <div>
-          <strong>Indonesia vs. a target market</strong>
-          <p>
-            Select a country to see how Indonesia&apos;s salary benchmarks stack up at each seniority
-            level in {currencyLabels[currency]} ({cadenceLabels[cadence].toLowerCase()}).
-          </p>
+          <strong>{copy.title}</strong>
+          <p>{copy.description}</p>
         </div>
         <div className="filter-group">
-          <label htmlFor="comparison-country">Compare with</label>
+          <label htmlFor="comparison-country">{copy.selectLabel}</label>
           <div className="pill-select">
             <select
               id="comparison-country"
@@ -158,7 +172,9 @@ const CountryComparisonChart = ({
             >
               {countries.map((entry) => (
                 <option key={entry.country} value={entry.country}>
-                  {entry.country} - {entry.band}
+                  {entry.country}
+                  {copy.optionSeparator}
+                  {entry.band}
                 </option>
               ))}
             </select>
@@ -171,7 +187,7 @@ const CountryComparisonChart = ({
           <BarChart data={chartData} barCategoryGap={24}>
             <CartesianGrid strokeDasharray="3 3" stroke="rgba(17, 17, 17, 0.15)" />
             <XAxis dataKey="level" tick={{ fill: "#333", fontSize: 12 }} />
-            <YAxis tickFormatter={axisFormatter} tick={{ fill: "#333", fontSize: 12 }} width={110} />
+            <YAxis tickFormatter={axisFormatter} tick={{ fill: "#333", fontSize: 12 }} width={120} />
             <Tooltip formatter={tooltipFormatter} />
             <Legend wrapperStyle={{ fontSize: "0.85rem" }} />
             <Bar dataKey="Indonesia" fill="rgba(15, 157, 88, 0.8)" radius={[8, 8, 0, 0]} />
@@ -186,17 +202,17 @@ const CountryComparisonChart = ({
 
       <div className="comparison-summary" aria-live="polite">
         <div className={`summary-card ${classifyDelta(seniorRow?.delta)}`}>
-          <strong>Senior gap</strong>
+          <strong>{copy.summaryLabels.senior}</strong>
           <span>{formatDelta(seniorRow?.delta)}</span>
           <p>{formatDeltaPct(seniorRow?.deltaPct)}</p>
         </div>
         <div className={`summary-card ${classifyDelta(middleRow?.delta)}`}>
-          <strong>Mid-level gap</strong>
+          <strong>{copy.summaryLabels.middle}</strong>
           <span>{formatDelta(middleRow?.delta)}</span>
           <p>{formatDeltaPct(middleRow?.deltaPct)}</p>
         </div>
         <div className={`summary-card ${classifyDelta(juniorRow?.delta)}`}>
-          <strong>Junior gap</strong>
+          <strong>{copy.summaryLabels.junior}</strong>
           <span>{formatDelta(juniorRow?.delta)}</span>
           <p>{formatDeltaPct(juniorRow?.deltaPct)}</p>
         </div>

@@ -2,13 +2,14 @@ import { useMemo, useState } from "react";
 import type { SalaryEntry, Band } from "../../data/salaryData";
 import {
   bandOrder,
-  cadenceLabels,
   convertSalary,
   currencyLabels,
   formatCurrency,
+  getCadenceLabel,
   seniorityOrder,
   type Cadence,
   type CurrencyCode,
+  type LanguageCode,
 } from "../../utils/salary";
 
 type SortKey =
@@ -20,24 +21,41 @@ type SortKey =
   | "juniorRatio"
   | "seniorRatio";
 
+interface SalaryTableCopy {
+  bandLabel: string;
+  downloadLabel: string;
+  allLabel: string;
+  noResults: string;
+  columns: Record<SortKey, string>;
+}
+
 interface SalaryTableProps {
   data: SalaryEntry[];
   currency: CurrencyCode;
   cadence: Cadence;
+  language: LanguageCode;
+  copy: SalaryTableCopy;
   exchangeRate?: number;
 }
 
-const columns: Array<{ key: SortKey; label: string; numeric?: boolean }> = [
-  { key: "country", label: "Country" },
-  { key: "band", label: "Band" },
-  { key: "junior", label: "Junior", numeric: true },
-  { key: "middle", label: "Middle", numeric: true },
-  { key: "senior", label: "Senior", numeric: true },
-  { key: "juniorRatio", label: "Junior Ratio", numeric: true },
-  { key: "seniorRatio", label: "Senior Ratio", numeric: true },
+const columnOrder: SortKey[] = [
+  "country",
+  "band",
+  "junior",
+  "middle",
+  "senior",
+  "juniorRatio",
+  "seniorRatio",
 ];
 
-const SalaryTable = ({ data, currency, cadence, exchangeRate }: SalaryTableProps) => {
+const SalaryTable = ({
+  data,
+  currency,
+  cadence,
+  language,
+  copy,
+  exchangeRate,
+}: SalaryTableProps) => {
   const [sortKey, setSortKey] = useState<SortKey>("senior");
   const [sortDirection, setSortDirection] = useState<"asc" | "desc">("desc");
   const [bandFilter, setBandFilter] = useState<"All" | Band>("All");
@@ -82,23 +100,21 @@ const SalaryTable = ({ data, currency, cadence, exchangeRate }: SalaryTableProps
     });
   }, [processedData, sortDirection, sortKey]);
 
+  const cadenceLabel = getCadenceLabel(language, cadence).toLowerCase();
   const csvContent = useMemo(() => {
     const header = [
-      "Country",
-      "Band",
-      ...seniorityOrder.map((level) => `${level} (${currencyLabels[currency]} ${cadenceLabels[cadence]})`),
-      "Junior Ratio",
-      "Senior Ratio",
+      copy.columns.country,
+      copy.columns.band,
+      ...seniorityOrder.map((level) => copy.columns[level]),
+      copy.columns.juniorRatio,
+      copy.columns.seniorRatio,
     ].join(",");
 
     const rows = processedData.map(({ entry, converted }) => {
       const values = [
         entry.country,
         entry.band,
-        ...seniorityOrder.map((level) => {
-          const amount = converted[level];
-          return formatCurrency(amount, currency);
-        }),
+        ...seniorityOrder.map((level) => formatCurrency(converted[level], currency)),
         entry.juniorRatio.toFixed(1),
         entry.seniorRatio.toFixed(1),
       ];
@@ -115,7 +131,7 @@ const SalaryTable = ({ data, currency, cadence, exchangeRate }: SalaryTableProps
     });
 
     return [header, ...rows].join("\n");
-  }, [processedData, currency, cadence]);
+  }, [processedData, currency, copy.columns]);
 
   const handleSort = (key: SortKey) => {
     if (key === sortKey) {
@@ -131,7 +147,7 @@ const SalaryTable = ({ data, currency, cadence, exchangeRate }: SalaryTableProps
     const blob = new Blob([csvContent], { type: "text/csv;charset=utf-8;" });
     const url = URL.createObjectURL(blob);
     const link = document.createElement("a");
-    const suffix = `${currency.toLowerCase()}-${cadence}`;
+    const suffix = `${currencyLabels[currency].toLowerCase()}-${cadenceLabel}`;
     link.href = url;
     link.download = `salary-benchmark-${suffix}.csv`;
     link.click();
@@ -150,13 +166,13 @@ const SalaryTable = ({ data, currency, cadence, exchangeRate }: SalaryTableProps
     <div className="card table-card">
       <div className="table-controls">
         <div className="filter-group">
-          <label htmlFor="band-table-filter">Band</label>
+          <label htmlFor="band-table-filter">{copy.bandLabel}</label>
           <select
             id="band-table-filter"
             value={bandFilter}
             onChange={(event) => setBandFilter(event.target.value as "All" | Band)}
           >
-            <option value="All">All</option>
+            <option value="All">{copy.allLabel}</option>
             {bandOrder.map((band) => (
               <option key={band} value={band}>
                 {band}
@@ -165,7 +181,7 @@ const SalaryTable = ({ data, currency, cadence, exchangeRate }: SalaryTableProps
           </select>
         </div>
         <button type="button" onClick={handleDownload}>
-          Download CSV
+          {copy.downloadLabel}
         </button>
       </div>
 
@@ -173,22 +189,22 @@ const SalaryTable = ({ data, currency, cadence, exchangeRate }: SalaryTableProps
         <table>
           <thead>
             <tr>
-              {columns.map((column) => (
+              {columnOrder.map((key) => (
                 <th
-                  key={column.key}
-                  onClick={() => handleSort(column.key)}
+                  key={key}
+                  onClick={() => handleSort(key)}
                   aria-sort={
-                    column.key === sortKey
+                    key === sortKey
                       ? sortDirection === "asc"
                         ? "ascending"
                         : "descending"
                       : "none"
                   }
-                  style={{ textAlign: column.numeric ? "right" : "left" }}
+                  style={{ textAlign: key === "country" || key === "band" ? "left" : "right" }}
                 >
                   <span>
-                    {column.label}
-                    <small>{renderSortIndicator(column.key)}</small>
+                    {copy.columns[key]}
+                    <small>{renderSortIndicator(key)}</small>
                   </span>
                 </th>
               ))}
@@ -214,7 +230,7 @@ const SalaryTable = ({ data, currency, cadence, exchangeRate }: SalaryTableProps
             ) : (
               <tr>
                 <td colSpan={7} style={{ textAlign: "center", padding: "2rem 1rem" }}>
-                  No records for the selected band.
+                  {copy.noResults}
                 </td>
               </tr>
             )}

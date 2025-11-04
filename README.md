@@ -2,8 +2,8 @@
 
 An Astro site with React islands that visualise Indonesia&apos;s product salary benchmarks against key global markets. The experience now includes global view controls and three interactive sections:
 
-- currency (USD vs IDR) and cadence (annual vs monthly) toggles that update every visualisation in real time
-- multi-country line chart that tracks salary growth across junior, middle, and senior roles
+- currency (USD vs IDR), cadence (annual vs monthly), and language (English vs Bahasa Indonesia) toggles that update every visualisation in real time
+- multi-country line chart with colour-coded band controls and shaded ranges showing the spread between the lowest and highest salaries in each band
 - Indonesia vs. single-market bar comparison with percentage deltas
 - sortable, filterable data table with CSV export for deeper analysis
 
