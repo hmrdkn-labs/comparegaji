@@ -1,46 +1,55 @@
-# Astro Starter Kit: Basics
+# ID Career Compare
 
-```sh
-npm create astro@latest -- --template basics
+An Astro site with React islands that visualise Indonesia&apos;s product salary benchmarks against key global markets. The experience focuses on three interactive sections:
+
+- multi-country line chart that tracks salary growth across junior, middle, and senior roles
+- Indonesia vs. single-market bar comparison with percentage deltas
+- sortable, filterable data table with CSV export for deeper analysis
+
+## Tech Stack
+
+- [Astro](https://astro.build/) with the Cloudflare adapter
+- React islands powered by [`@astrojs/react`](https://docs.astro.build/en/guides/integrations-guide/react/)
+- [Recharts](https://recharts.org/) for both the line and bar visualisations
+
+## Project Layout
+
+```
+src/
+  components/
+    islands/
+      CountryComparisonChart.tsx
+      MultiCountryLineChart.tsx
+      SalaryTable.tsx
+  data/
+    salaryData.ts        // static benchmark dataset
+  layouts/
+    Layout.astro         // global shell, typography, palette variables
+  pages/
+    index.astro          // main page composed of the interactive sections
+  styles/
+    global.css           // shared tokens and component-level styling
 ```
 
-> 🧑‍🚀 **Seasoned astronaut?** Delete this file. Have fun!
+The dataset lives in `src/data/salaryData.ts` as a typed array of `SalaryEntry`, making it easy to extend or replace with updated figures.
 
-## 🚀 Project Structure
+## Local Development
 
-Inside of your Astro project, you'll see the following folders and files:
-
-```text
-/
-├── public/
-│   └── favicon.svg
-├── src
-│   ├── assets
-│   │   └── astro.svg
-│   ├── components
-│   │   └── Welcome.astro
-│   ├── layouts
-│   │   └── Layout.astro
-│   └── pages
-│       └── index.astro
-└── package.json
+```bash
+npm install
+npm run dev
 ```
 
-To learn more about the folder structure of an Astro project, refer to [our guide on project structure](https://docs.astro.build/en/basics/project-structure/).
+The dev server runs at `http://localhost:4321`. React islands mount on the client, so make sure client-side errors surface cleanly in your console while iterating.
 
-## 🧞 Commands
+### Build & Deploy
 
-All commands are run from the root of the project, from a terminal:
+- `npm run build` – generates the static build
+- `npm run preview` – runs the built output locally via `wrangler dev`
+- `npm run deploy` – bundles and deploys to Cloudflare Workers (requires credentials)
 
-| Command                   | Action                                           |
-| :------------------------ | :----------------------------------------------- |
-| `npm install`             | Installs dependencies                            |
-| `npm run dev`             | Starts local dev server at `localhost:4321`      |
-| `npm run build`           | Build your production site to `./dist/`          |
-| `npm run preview`         | Preview your build locally, before deploying     |
-| `npm run astro ...`       | Run CLI commands like `astro add`, `astro check` |
-| `npm run astro -- --help` | Get help using the Astro CLI                     |
+## Extending The Experience
 
-## 👀 Want to learn more?
-
-Feel free to check [our documentation](https://docs.astro.build) or jump into our [Discord server](https://astro.build/chat).
+- To add more countries, append entries to `salaryData.ts`. The charts and table react automatically.
+- Additional grouping logic (e.g. by region) can be added in `src/utils/salary.ts` and passed into the islands.
+- If you swap Recharts for another library, keep the components under `src/components/islands/` to preserve Astro&apos;s island architecture.
