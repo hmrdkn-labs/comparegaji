@@ -40,7 +40,10 @@ export const countryPalette: string[] = [
   "#fb7185",
 ];
 
-const seniorityLabelsByLanguage: Record<LanguageCode, Record<SeniorityKey, string>> = {
+const seniorityLabelsByLanguage: Record<
+  LanguageCode,
+  Record<SeniorityKey, string>
+> = {
   en: {
     junior: "Junior",
     middle: "Middle",
@@ -73,6 +76,39 @@ export const currencySymbols: Record<CurrencyCode, string> = {
   USD: "$",
   IDR: "Rp",
 };
+
+export const countryFlags: Record<string, string> = {
+  "United States": "🇺🇸",
+  "United Kingdom": "🇬🇧",
+  Switzerland: "🇨🇭",
+  Singapore: "🇸🇬",
+  Netherlands: "🇳🇱",
+  Ireland: "🇮🇪",
+  Germany: "🇩🇪",
+  France: "🇫🇷",
+  Canada: "🇨🇦",
+  Australia: "🇦🇺",
+  Taiwan: "🇹🇼",
+  "South Korea": "🇰🇷",
+  Japan: "🇯🇵",
+  Spain: "🇪🇸",
+  Poland: "🇵🇱",
+  "Czech Rep.": "🇨🇿",
+  Mexico: "🇲🇽",
+  Brazil: "🇧🇷",
+  Argentina: "🇦🇷",
+  Malaysia: "🇲🇾",
+  Vietnam: "🇻🇳",
+  Indonesia: "🇮🇩",
+  Philippines: "🇵🇭",
+  India: "🇮🇳",
+  Egypt: "🇪🇬",
+};
+
+export function getCountryWithFlag(countryName: string): string {
+  const flag = countryFlags[countryName];
+  return flag ? `${flag} ${countryName}` : countryName;
+}
 
 export function getSeniorityLabels(language: LanguageCode) {
   return seniorityLabelsByLanguage[language] ?? seniorityLabelsByLanguage.en;
@@ -107,7 +143,10 @@ export function getBandDistributions(data: SalaryEntry[]): BandDistribution[] {
       continue;
     }
 
-    const averages = { junior: 0, middle: 0, senior: 0 } as Record<SeniorityKey, number>;
+    const averages = { junior: 0, middle: 0, senior: 0 } as Record<
+      SeniorityKey,
+      number
+    >;
     const minimums = {
       junior: Number.POSITIVE_INFINITY,
       middle: Number.POSITIVE_INFINITY,
@@ -140,7 +179,9 @@ export function getBandDistributions(data: SalaryEntry[]): BandDistribution[] {
 
 export function getBandDistribution(data: SalaryEntry[], band: Band) {
   const distributions = getBandDistributions(data);
-  return distributions.find((distribution) => distribution.band === band) ?? null;
+  return (
+    distributions.find((distribution) => distribution.band === band) ?? null
+  );
 }
 
 export function convertSalary(

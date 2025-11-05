@@ -1,4 +1,10 @@
-import { Fragment, useEffect, useMemo, useState, type CSSProperties } from "react";
+import {
+  Fragment,
+  useEffect,
+  useMemo,
+  useState,
+  type CSSProperties,
+} from "react";
 import {
   Area,
   CartesianGrid,
@@ -22,6 +28,7 @@ import {
   getBandDistributions,
   getBandDistribution,
   getCadenceLabel,
+  getCountryWithFlag,
   seniorityOrder,
   type Cadence,
   type CurrencyCode,
@@ -91,15 +98,18 @@ const MultiCountryLineChart = ({
   exchangeRate,
 }: MultiCountryLineChartProps) => {
   const bandDistributions = useMemo(() => getBandDistributions(data), [data]);
-  const benchmarkDistribution = useMemo(() => getBandDistribution(data, "Benchmark"), [data]);
+  const benchmarkDistribution = useMemo(
+    () => getBandDistribution(data, "Benchmark"),
+    [data],
+  );
   const indonesiaEntry = useMemo(
     () => data.find((entry) => entry.country === "Indonesia"),
     [data],
   );
 
   const countryColorMap = useMemo(() => {
-    const sorted = [...new Set(data.map((entry) => entry.country))].sort((a, b) =>
-      a.localeCompare(b),
+    const sorted = [...new Set(data.map((entry) => entry.country))].sort(
+      (a, b) => a.localeCompare(b),
     );
     const map = new Map<string, string>();
     sorted.forEach((country, index) => {
@@ -110,7 +120,9 @@ const MultiCountryLineChart = ({
 
   const initialCountries = useMemo(() => {
     const available = data.map((entry) => entry.country);
-    const seeded = defaultCountries.filter((country) => available.includes(country));
+    const seeded = defaultCountries.filter((country) =>
+      available.includes(country),
+    );
     if (seeded.length) {
       return seeded;
     }
@@ -120,7 +132,8 @@ const MultiCountryLineChart = ({
 
   const [viewMode, setViewMode] = useState<ViewMode>("countries");
   const [selectedBand, setSelectedBand] = useState<"All" | Band>("All");
-  const [selectedCountries, setSelectedCountries] = useState<string[]>(initialCountries);
+  const [selectedCountries, setSelectedCountries] =
+    useState<string[]>(initialCountries);
   const [bandCompareCountry, setBandCompareCountry] = useState<string>("");
 
   const dataByCountry = useMemo(() => {
@@ -142,7 +155,9 @@ const MultiCountryLineChart = ({
         unique.set(entry.country, entry);
       }
     });
-    return Array.from(unique.values()).sort((a, b) => a.country.localeCompare(b.country));
+    return Array.from(unique.values()).sort((a, b) =>
+      a.country.localeCompare(b.country),
+    );
   }, [bandFilteredEntries]);
 
   useEffect(() => {
@@ -164,7 +179,9 @@ const MultiCountryLineChart = ({
       return [];
     }
     return data
-      .filter((entry) => entry.band === selectedBand && entry.country !== "Indonesia")
+      .filter(
+        (entry) => entry.band === selectedBand && entry.country !== "Indonesia",
+      )
       .sort((a, b) => a.country.localeCompare(b.country));
   }, [data, selectedBand]);
 
@@ -174,13 +191,16 @@ const MultiCountryLineChart = ({
       return;
     }
 
-    if (!bandCountryOptions.some((entry) => entry.country === bandCompareCountry)) {
+    if (
+      !bandCountryOptions.some((entry) => entry.country === bandCompareCountry)
+    ) {
       setBandCompareCountry("");
     }
   }, [selectedBand, bandCountryOptions, bandCompareCountry]);
 
   const bandCompareEntry = useMemo(
-    () => bandCountryOptions.find((entry) => entry.country === bandCompareCountry),
+    () =>
+      bandCountryOptions.find((entry) => entry.country === bandCompareCountry),
     [bandCountryOptions, bandCompareCountry],
   );
 
@@ -191,7 +211,8 @@ const MultiCountryLineChart = ({
       const hasRange = Boolean(
         distribution &&
           seniorityOrder.some(
-            (level) => distribution.minimums[level] !== distribution.maximums[level],
+            (level) =>
+              distribution.minimums[level] !== distribution.maximums[level],
           ),
       );
 
@@ -206,8 +227,13 @@ const MultiCountryLineChart = ({
               exchangeRate,
             )
           : indonesiaEntry
-          ? convertSalary(indonesiaEntry[level], currency, cadence, exchangeRate)
-          : undefined;
+            ? convertSalary(
+                indonesiaEntry[level],
+                currency,
+                cadence,
+                exchangeRate,
+              )
+            : undefined;
 
         if (typeof benchmarkValue === "number") {
           row.Benchmark = benchmarkValue;
@@ -232,7 +258,8 @@ const MultiCountryLineChart = ({
         }
 
         if (typeof minValue !== "number" || typeof maxValue !== "number") {
-          const fallback = typeof benchmarkValue === "number" ? benchmarkValue : 0;
+          const fallback =
+            typeof benchmarkValue === "number" ? benchmarkValue : 0;
           minValue = fallback;
           maxValue = fallback;
         }
@@ -287,7 +314,7 @@ const MultiCountryLineChart = ({
       if (bandCompareEntry) {
         lines.push({
           key: bandCompareEntry.country,
-          label: bandCompareEntry.country,
+          label: getCountryWithFlag(bandCompareEntry.country),
           stroke: countryColorMap.get(bandCompareEntry.country) ?? "#2563eb",
         });
       }
@@ -357,7 +384,7 @@ const MultiCountryLineChart = ({
 
     const lines: LineConfig[] = selectedCountries.map((country) => ({
       key: country,
-      label: country,
+      label: getCountryWithFlag(country),
       stroke: countryColorMap.get(country) ?? "#2563eb",
     }));
 
@@ -366,7 +393,12 @@ const MultiCountryLineChart = ({
       selectedCountries.forEach((country) => {
         const entry = dataByCountry.get(country);
         if (entry) {
-          row[country] = convertSalary(entry[level], currency, cadence, exchangeRate);
+          row[country] = convertSalary(
+            entry[level],
+            currency,
+            cadence,
+            exchangeRate,
+          );
         }
       });
       return row;
@@ -417,7 +449,9 @@ const MultiCountryLineChart = ({
 
   const axisFormatter = (value: number) => formatAxisValue(value, currency);
   const footnoteTemplate =
-    chartConfig.mode === "countries" ? copy.footnoteCountries : copy.footnoteBands;
+    chartConfig.mode === "countries"
+      ? copy.footnoteCountries
+      : copy.footnoteBands;
 
   const renderTooltip = ({ active, payload, label }: any) => {
     if (!active || !payload || !payload.length) {
@@ -433,7 +467,9 @@ const MultiCountryLineChart = ({
       maxWidth: 260,
     };
 
-    const entries = payload.filter((item: any) => lineLabelMap.has(item.dataKey));
+    const entries = payload.filter((item: any) =>
+      lineLabelMap.has(item.dataKey),
+    );
 
     if (!entries.length) {
       return null;
@@ -441,7 +477,9 @@ const MultiCountryLineChart = ({
 
     return (
       <div style={containerStyle}>
-        <strong style={{ display: "block", marginBottom: "0.35rem" }}>{label}</strong>
+        <strong style={{ display: "block", marginBottom: "0.35rem" }}>
+          {label}
+        </strong>
         <ul
           style={{
             margin: 0,
@@ -454,7 +492,11 @@ const MultiCountryLineChart = ({
           {entries.map((item: any) => (
             <li
               key={item.dataKey}
-              style={{ display: "flex", justifyContent: "space-between", gap: "0.8rem" }}
+              style={{
+                display: "flex",
+                justifyContent: "space-between",
+                gap: "0.8rem",
+              }}
             >
               <span style={{ color: item.color, fontWeight: 600 }}>
                 {lineLabelMap.get(item.dataKey) ?? item.name}
@@ -475,7 +517,8 @@ const MultiCountryLineChart = ({
     .replace("%cadence%", cadenceLabel);
 
   const bandFillColor =
-    chartConfig.fillColor ?? bandColors[selectedBand === "All" ? "Benchmark" : selectedBand];
+    chartConfig.fillColor ??
+    bandColors[selectedBand === "All" ? "Benchmark" : selectedBand];
 
   return (
     <div className="card chart-card">
@@ -505,7 +548,11 @@ const MultiCountryLineChart = ({
       <div className="filter-row">
         <div className="filter-group">
           <label>{copy.bandFilterLabel}</label>
-          <div className="band-toggle" role="group" aria-label={copy.bandFilterLabel}>
+          <div
+            className="band-toggle"
+            role="group"
+            aria-label={copy.bandFilterLabel}
+          >
             <button
               type="button"
               onClick={() => handleBandSelect("All")}
@@ -528,7 +575,9 @@ const MultiCountryLineChart = ({
                   aria-pressed={active}
                   onClick={() => handleBandSelect(band)}
                   style={{
-                    backgroundColor: active ? baseColor : colorWithAlpha(baseColor, 0.16),
+                    backgroundColor: active
+                      ? baseColor
+                      : colorWithAlpha(baseColor, 0.16),
                     color: active ? "#ffffff" : "#111111",
                     borderColor: colorWithAlpha(baseColor, 0.55),
                   }}
@@ -558,7 +607,7 @@ const MultiCountryLineChart = ({
                 <option value="">{copy.comparePlaceholder}</option>
                 {bandCountryOptions.map((entry) => (
                   <option key={entry.country} value={entry.country}>
-                    {entry.country}
+                    {getCountryWithFlag(entry.country)}
                   </option>
                 ))}
               </select>
@@ -568,7 +617,11 @@ const MultiCountryLineChart = ({
       </div>
 
       {chartConfig.mode === "countries" && (
-        <div className="country-grid" role="listbox" aria-label="Select countries to display">
+        <div
+          className="country-grid"
+          role="listbox"
+          aria-label="Select countries to display"
+        >
           {availableCountries.map((entry) => {
             const active = selectedCountries.includes(entry.country);
             const color = countryColorMap.get(entry.country) ?? "#94a3b8";
@@ -591,7 +644,7 @@ const MultiCountryLineChart = ({
                   onChange={() => toggleCountry(entry.country)}
                   style={{ accentColor: color }}
                 />
-                {entry.country}
+                {getCountryWithFlag(entry.country)}
               </label>
             );
           })}
@@ -602,38 +655,46 @@ const MultiCountryLineChart = ({
       <div className="chart-wrapper">
         <ResponsiveContainer width="100%" height={420}>
           <LineChart data={chartConfig.chartData}>
-            <CartesianGrid strokeDasharray="3 3" stroke="rgba(17, 17, 17, 0.15)" />
+            <CartesianGrid
+              strokeDasharray="3 3"
+              stroke="rgba(17, 17, 17, 0.15)"
+            />
             <XAxis dataKey="level" tick={{ fill: "#333", fontSize: 12 }} />
-            <YAxis tickFormatter={axisFormatter} tick={{ fill: "#333", fontSize: 12 }} width={120} />
+            <YAxis
+              tickFormatter={axisFormatter}
+              tick={{ fill: "#333", fontSize: 12 }}
+              width={120}
+            />
             <Tooltip content={renderTooltip} />
             <Legend wrapperStyle={{ fontSize: "0.85rem" }} />
 
-            {chartConfig.mode === "bandsAll" && chartConfig.ranges?.map((range) => (
-              <>
-                <Area
-                  key={`${range.band}-base`}
-                  type="monotone"
-                  dataKey={range.minKey}
-                  stackId={range.stackId}
-                  stroke="none"
-                  fill="transparent"
-                  activeDot={false}
-                  isAnimationActive={false}
-                  legendType="none"
-                />
-                <Area
-                  key={`${range.band}-range`}
-                  type="monotone"
-                  dataKey={range.deltaKey}
-                  stackId={range.stackId}
-                  stroke="none"
-                  fill={colorWithAlpha(range.color, 0.3)}
-                  activeDot={false}
-                  isAnimationActive={false}
-                  legendType="none"
-                />
-              </>
-            ))}
+            {chartConfig.mode === "bandsAll" &&
+              chartConfig.ranges?.map((range) => (
+                <>
+                  <Area
+                    key={`${range.band}-base`}
+                    type="monotone"
+                    dataKey={range.minKey}
+                    stackId={range.stackId}
+                    stroke="none"
+                    fill="transparent"
+                    activeDot={false}
+                    isAnimationActive={false}
+                    legendType="none"
+                  />
+                  <Area
+                    key={`${range.band}-range`}
+                    type="monotone"
+                    dataKey={range.deltaKey}
+                    stackId={range.stackId}
+                    stroke="none"
+                    fill={colorWithAlpha(range.color, 0.3)}
+                    activeDot={false}
+                    isAnimationActive={false}
+                    legendType="none"
+                  />
+                </>
+              ))}
 
             {chartConfig.mode === "bandDetail" && (
               <>

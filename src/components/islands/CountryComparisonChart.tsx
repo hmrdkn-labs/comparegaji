@@ -14,6 +14,7 @@ import {
   convertSalary,
   formatAxisValue,
   formatCurrency,
+  getCountryWithFlag,
   seniorityOrder,
   type Cadence,
   type CurrencyCode,
@@ -98,7 +99,14 @@ const CountryComparisonChart = ({
         deltaPct,
       };
     });
-  }, [cadence, currency, exchangeRate, indonesia, selectedEntry, seniorityLabels]);
+  }, [
+    cadence,
+    currency,
+    exchangeRate,
+    indonesia,
+    selectedEntry,
+    seniorityLabels,
+  ]);
 
   if (!indonesia || !countries.length || !selectedEntry) {
     return (
@@ -109,9 +117,15 @@ const CountryComparisonChart = ({
     );
   }
 
-  const seniorRow = chartData.find((row) => row.level === seniorityLabels.senior);
-  const middleRow = chartData.find((row) => row.level === seniorityLabels.middle);
-  const juniorRow = chartData.find((row) => row.level === seniorityLabels.junior);
+  const seniorRow = chartData.find(
+    (row) => row.level === seniorityLabels.senior,
+  );
+  const middleRow = chartData.find(
+    (row) => row.level === seniorityLabels.middle,
+  );
+  const juniorRow = chartData.find(
+    (row) => row.level === seniorityLabels.junior,
+  );
 
   const formatDelta = (value?: number) => {
     if (value === undefined || !Number.isFinite(value)) {
@@ -172,7 +186,7 @@ const CountryComparisonChart = ({
             >
               {countries.map((entry) => (
                 <option key={entry.country} value={entry.country}>
-                  {entry.country}
+                  {getCountryWithFlag(entry.country)}
                   {copy.optionSeparator}
                   {entry.band}
                 </option>
@@ -185,12 +199,23 @@ const CountryComparisonChart = ({
       <div className="chart-wrapper">
         <ResponsiveContainer width="100%" height={380}>
           <BarChart data={chartData} barCategoryGap={24}>
-            <CartesianGrid strokeDasharray="3 3" stroke="rgba(17, 17, 17, 0.15)" />
+            <CartesianGrid
+              strokeDasharray="3 3"
+              stroke="rgba(17, 17, 17, 0.15)"
+            />
             <XAxis dataKey="level" tick={{ fill: "#333", fontSize: 12 }} />
-            <YAxis tickFormatter={axisFormatter} tick={{ fill: "#333", fontSize: 12 }} width={120} />
+            <YAxis
+              tickFormatter={axisFormatter}
+              tick={{ fill: "#333", fontSize: 12 }}
+              width={120}
+            />
             <Tooltip formatter={tooltipFormatter} />
             <Legend wrapperStyle={{ fontSize: "0.85rem" }} />
-            <Bar dataKey="Indonesia" fill="rgba(15, 157, 88, 0.8)" radius={[8, 8, 0, 0]} />
+            <Bar
+              dataKey="Indonesia"
+              fill="rgba(15, 157, 88, 0.8)"
+              radius={[8, 8, 0, 0]}
+            />
             <Bar
               dataKey={selectedEntry.country}
               fill="rgba(66, 133, 244, 0.85)"

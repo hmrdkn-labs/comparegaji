@@ -6,6 +6,7 @@ import {
   currencyLabels,
   formatCurrency,
   getCadenceLabel,
+  getCountryWithFlag,
   getSeniorityLabels,
   type Cadence,
   type CurrencyCode,
@@ -123,7 +124,8 @@ const translations: Record<LanguageCode, TranslationShape> = {
       marketsLabel: "Benchmarked markets",
       marketsDescription: "Countries included",
       topSeniorLabel: "Top senior salary",
-      topSeniorSuffix: (country) => (country ? ` · ${country}` : ""),
+      topSeniorSuffix: (country) =>
+        country ? ` · ${getCountryWithFlag(country)}` : "",
       topSeniorDescription: (cadence, currency) => `${cadence} ${currency}`,
       indonesiaLabel: "Indonesia senior benchmark",
       indonesiaDescription: (cadence, currency) => `${cadence} ${currency}`,
@@ -139,10 +141,12 @@ const translations: Record<LanguageCode, TranslationShape> = {
         countriesLabel: "Countries",
         bandsLabel: "Bands",
         bandFilterLabel: "Band filter",
-        bandHelper: "Benchmark (Indonesia) is always shown. Pick a country in this band to compare.",
+        bandHelper:
+          "Benchmark (Indonesia) is always shown. Pick a country in this band to compare.",
         emptyState: "No countries available for the selected band.",
         footnoteCountries: "Salary values shown in %currency% (%cadence%).",
-        footnoteBands: "Benchmark line (Indonesia) plus minimum and maximum lines are shown in %currency% (%cadence%).",
+        footnoteBands:
+          "Benchmark line (Indonesia) plus minimum and maximum lines are shown in %currency% (%cadence%).",
         rangeLabels: {
           min: "%band% minimum",
           max: "%band% maximum",
@@ -161,7 +165,8 @@ const translations: Record<LanguageCode, TranslationShape> = {
         description: "",
         selectLabel: "Compare with",
         optionSeparator: " - ",
-        noData: "We need at least one other country to run a side-by-side comparison.",
+        noData:
+          "We need at least one other country to run a side-by-side comparison.",
         summaryLabels: {
           senior: "Senior gap",
           middle: "Mid-level gap",
@@ -213,7 +218,8 @@ const translations: Record<LanguageCode, TranslationShape> = {
       marketsLabel: "Jumlah pasar",
       marketsDescription: "Total negara",
       topSeniorLabel: "Gaji senior tertinggi",
-      topSeniorSuffix: (country) => (country ? ` · ${country}` : ""),
+      topSeniorSuffix: (country) =>
+        country ? ` · ${getCountryWithFlag(country)}` : "",
       topSeniorDescription: (cadence, currency) => `${cadence} ${currency}`,
       indonesiaLabel: "Patokan senior Indonesia",
       indonesiaDescription: (cadence, currency) => `${cadence} ${currency}`,
@@ -229,10 +235,12 @@ const translations: Record<LanguageCode, TranslationShape> = {
         countriesLabel: "Negara",
         bandsLabel: "Band",
         bandFilterLabel: "Filter band",
-        bandHelper: "Benchmark (Indonesia) selalu tampil. Pilih negara di band ini untuk dibandingkan.",
+        bandHelper:
+          "Benchmark (Indonesia) selalu tampil. Pilih negara di band ini untuk dibandingkan.",
         emptyState: "Tidak ada negara untuk band yang dipilih.",
         footnoteCountries: "Seluruh nilai dalam %currency% (%cadence%).",
-        footnoteBands: "Garis benchmark (Indonesia) beserta batas bawah dan atas band ditampilkan dalam %currency% (%cadence%).",
+        footnoteBands:
+          "Garis benchmark (Indonesia) beserta batas bawah dan atas band ditampilkan dalam %currency% (%cadence%).",
         rangeLabels: {
           min: "%band% terendah",
           max: "%band% tertinggi",
@@ -251,7 +259,8 @@ const translations: Record<LanguageCode, TranslationShape> = {
         description: "",
         selectLabel: "Bandingkan dengan",
         optionSeparator: " · ",
-        noData: "Perlu minimal satu negara lain untuk perbandingan berdampingan.",
+        noData:
+          "Perlu minimal satu negara lain untuk perbandingan berdampingan.",
         summaryLabels: {
           senior: "Selisih senior",
           middle: "Selisih menengah",
@@ -289,7 +298,10 @@ interface SalaryExplorerProps {
   exchangeRate?: number;
 }
 
-const SalaryExplorer = ({ data, exchangeRate = USD_TO_IDR }: SalaryExplorerProps) => {
+const SalaryExplorer = ({
+  data,
+  exchangeRate = USD_TO_IDR,
+}: SalaryExplorerProps) => {
   const [currency, setCurrency] = useState<CurrencyCode>("USD");
   const [cadence, setCadence] = useState<Cadence>("annual");
   const [language, setLanguage] = useState<LanguageCode>("en");
@@ -317,7 +329,12 @@ const SalaryExplorer = ({ data, exchangeRate = USD_TO_IDR }: SalaryExplorerProps
   }, [data]);
 
   const summaryStats = useMemo(() => {
-    const topSeniorValue = convertSalary(topSenior?.senior ?? 0, currency, cadence, exchangeRate);
+    const topSeniorValue = convertSalary(
+      topSenior?.senior ?? 0,
+      currency,
+      cadence,
+      exchangeRate,
+    );
     const indonesiaSeniorValue = convertSalary(
       indonesia?.senior ?? 0,
       currency,
@@ -336,13 +353,19 @@ const SalaryExplorer = ({ data, exchangeRate = USD_TO_IDR }: SalaryExplorerProps
         label: `${t.summary.topSeniorLabel}${t.summary.topSeniorSuffix(topSenior?.country)}`,
         value: formatCurrency(topSeniorValue, currency),
         tone: "positive" as const,
-        description: t.summary.topSeniorDescription(cadenceLabel, currencyLabel),
+        description: t.summary.topSeniorDescription(
+          cadenceLabel,
+          currencyLabel,
+        ),
       },
       {
         label: t.summary.indonesiaLabel,
         value: formatCurrency(indonesiaSeniorValue, currency),
         tone: "negative" as const,
-        description: t.summary.indonesiaDescription(cadenceLabel, currencyLabel),
+        description: t.summary.indonesiaDescription(
+          cadenceLabel,
+          currencyLabel,
+        ),
       },
     ];
   }, [
@@ -403,10 +426,18 @@ const SalaryExplorer = ({ data, exchangeRate = USD_TO_IDR }: SalaryExplorerProps
         <h1>{t.heroTitle}</h1>
         <p>{t.heroDescription}</p>
 
-        <div className="filter-row hero-controls" role="group" aria-label="View settings">
+        <div
+          className="filter-row hero-controls"
+          role="group"
+          aria-label="View settings"
+        >
           <div className="filter-group">
             <label>{t.controls.currency}</label>
-            <div className="view-toggle" role="group" aria-label={t.controls.currency}>
+            <div
+              className="view-toggle"
+              role="group"
+              aria-label={t.controls.currency}
+            >
               <button
                 type="button"
                 aria-pressed={currency === "USD"}
@@ -425,7 +456,11 @@ const SalaryExplorer = ({ data, exchangeRate = USD_TO_IDR }: SalaryExplorerProps
           </div>
           <div className="filter-group">
             <label>{t.controls.cadence}</label>
-            <div className="view-toggle" role="group" aria-label={t.controls.cadence}>
+            <div
+              className="view-toggle"
+              role="group"
+              aria-label={t.controls.cadence}
+            >
               <button
                 type="button"
                 aria-pressed={cadence === "annual"}
@@ -444,7 +479,11 @@ const SalaryExplorer = ({ data, exchangeRate = USD_TO_IDR }: SalaryExplorerProps
           </div>
           <div className="filter-group">
             <label>{t.controls.language}</label>
-            <div className="view-toggle" role="group" aria-label={t.controls.language}>
+            <div
+              className="view-toggle"
+              role="group"
+              aria-label={t.controls.language}
+            >
               <button
                 type="button"
                 aria-pressed={language === "en"}
@@ -465,7 +504,10 @@ const SalaryExplorer = ({ data, exchangeRate = USD_TO_IDR }: SalaryExplorerProps
 
         <div className="comparison-summary hero-summary" aria-live="polite">
           {summaryStats.map((stat) => (
-            <div key={stat.label} className={`summary-card summary-card--${stat.tone}`}>
+            <div
+              key={stat.label}
+              className={`summary-card summary-card--${stat.tone}`}
+            >
               <strong>{stat.label}</strong>
               <span>{stat.value}</span>
               {stat.description && <p>{stat.description}</p>}

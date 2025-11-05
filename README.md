@@ -1,11 +1,20 @@
-# ID Career Compare
+# CompareGaji
 
-An Astro site with React islands that visualise Indonesia&apos;s product salary benchmarks against key global markets. The experience now includes global view controls and three interactive sections:
+**Live Demo:** [https://comparegaji.pages.dev/](https://comparegaji.pages.dev/)
 
-- currency (USD vs IDR), cadence (annual vs monthly), and language (English vs Bahasa Indonesia) toggles that update every visualisation in real time
-- multi-country line chart with colour-coded band controls and shaded ranges showing the spread between the lowest and highest salaries in each band
-- Indonesia vs. single-market bar comparison with percentage deltas
-- sortable, filterable data table with CSV export for deeper analysis
+An Astro site with React islands that visualises Indonesia's tech salary benchmarks against 24 global markets. The bilingual (English/Bahasa Indonesia) experience includes interactive controls and data visualizations optimized for desktop and mobile devices.
+
+## ✨ Key Features
+
+- **🌍 Multi-currency & cadence support**: Switch between USD/IDR and annual/monthly in real-time
+- **🌐 Bilingual interface**: Full English and Bahasa Indonesia translations
+- **🎌 Country flags**: Visual country identification with Unicode flag emojis
+- **📊 Interactive charts**: 
+  - Multi-country line chart with band/country toggle modes
+  - Color-coded salary bands with shaded min/max ranges
+  - Indonesia vs. any country bar comparison with percentage deltas
+- **📱 Mobile-optimized**: Touch-friendly controls with 44px minimum tap targets
+- **📥 Data export**: Sortable, filterable table with CSV download
 
 ## Tech Stack
 
@@ -52,6 +61,58 @@ The dev server runs at `http://localhost:4321`. React islands mount on the clien
 
 ## Extending The Experience
 
-- To add more countries, append entries to `salaryData.ts`. The charts and table react automatically.
-- Additional grouping logic (e.g. by region) can be added in `src/utils/salary.ts` and passed into the islands.
-- If you swap Recharts for another library, keep the components under `src/components/islands/` to preserve Astro&apos;s island architecture.
+### Adding More Countries
+
+To add more countries, append entries to `src/data/salaryData.ts`:
+
+```typescript
+{
+  country: "Brazil",
+  band: "Middle Band",
+  junior: 35000,
+  middle: 52000,
+  senior: 78000,
+  juniorRatio: 2.5,
+  seniorRatio: 3.1
+}
+```
+
+Don't forget to add the corresponding flag emoji in `src/utils/salary.ts`:
+
+```typescript
+export const countryFlags: Record<string, string> = {
+  // ... existing flags
+  "Brazil": "🇧🇷",
+};
+```
+
+### Customization
+
+- **Regional grouping**: Add grouping logic in `src/utils/salary.ts` and pass into the islands
+- **Chart library**: If swapping Recharts, keep components under `src/components/islands/` to preserve Astro's island architecture
+- **Styling**: Modify design tokens in `src/styles/global.css` (CSS custom properties for colors, shadows, etc.)
+- **Translations**: Extend translation objects in `SalaryExplorer.tsx` for additional languages
+
+## Data Sources
+
+The salary data represents tech industry benchmarks as of 2024. Data should be periodically updated to reflect current market conditions.
+
+## Deployment
+
+This project is deployed on **Cloudflare Pages**:
+
+1. Push to your repository
+2. Connect to Cloudflare Pages
+3. Build command: `npm run build`
+4. Output directory: `dist`
+
+The site automatically deploys on push to the main branch.
+
+## Contributing
+
+Contributions are welcome! Please feel free to submit issues or pull requests for:
+- Updated salary data
+- Additional countries
+- UI/UX improvements
+- Bug fixes
+- Translation corrections

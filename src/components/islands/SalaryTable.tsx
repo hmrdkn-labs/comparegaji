@@ -6,6 +6,7 @@ import {
   currencyLabels,
   formatCurrency,
   getCadenceLabel,
+  getCountryWithFlag,
   seniorityOrder,
   type Cadence,
   type CurrencyCode,
@@ -114,7 +115,9 @@ const SalaryTable = ({
       const values = [
         entry.country,
         entry.band,
-        ...seniorityOrder.map((level) => formatCurrency(converted[level], currency)),
+        ...seniorityOrder.map((level) =>
+          formatCurrency(converted[level], currency),
+        ),
         entry.juniorRatio.toFixed(1),
         entry.seniorRatio.toFixed(1),
       ];
@@ -170,7 +173,9 @@ const SalaryTable = ({
           <select
             id="band-table-filter"
             value={bandFilter}
-            onChange={(event) => setBandFilter(event.target.value as "All" | Band)}
+            onChange={(event) =>
+              setBandFilter(event.target.value as "All" | Band)
+            }
           >
             <option value="All">{copy.allLabel}</option>
             {bandOrder.map((band) => (
@@ -200,7 +205,10 @@ const SalaryTable = ({
                         : "descending"
                       : "none"
                   }
-                  style={{ textAlign: key === "country" || key === "band" ? "left" : "right" }}
+                  style={{
+                    textAlign:
+                      key === "country" || key === "band" ? "left" : "right",
+                  }}
                 >
                   <span>
                     {copy.columns[key]}
@@ -214,22 +222,35 @@ const SalaryTable = ({
             {sortedData.length ? (
               sortedData.map(({ entry, converted }) => (
                 <tr key={entry.country} data-country={entry.country}>
-                  <td>{entry.country}</td>
+                  <td>{getCountryWithFlag(entry.country)}</td>
                   <td>{entry.band}</td>
-                  <td style={{ textAlign: "right" }}>{formatCurrency(converted.junior, currency)}</td>
-                  <td style={{ textAlign: "right" }}>{formatCurrency(converted.middle, currency)}</td>
-                  <td style={{ textAlign: "right" }}>{formatCurrency(converted.senior, currency)}</td>
                   <td style={{ textAlign: "right" }}>
-                    <span className="ratio-pill">{entry.juniorRatio.toFixed(1)}x</span>
+                    {formatCurrency(converted.junior, currency)}
                   </td>
                   <td style={{ textAlign: "right" }}>
-                    <span className="ratio-pill">{entry.seniorRatio.toFixed(1)}x</span>
+                    {formatCurrency(converted.middle, currency)}
+                  </td>
+                  <td style={{ textAlign: "right" }}>
+                    {formatCurrency(converted.senior, currency)}
+                  </td>
+                  <td style={{ textAlign: "right" }}>
+                    <span className="ratio-pill">
+                      {entry.juniorRatio.toFixed(1)}x
+                    </span>
+                  </td>
+                  <td style={{ textAlign: "right" }}>
+                    <span className="ratio-pill">
+                      {entry.seniorRatio.toFixed(1)}x
+                    </span>
                   </td>
                 </tr>
               ))
             ) : (
               <tr>
-                <td colSpan={7} style={{ textAlign: "center", padding: "2rem 1rem" }}>
+                <td
+                  colSpan={7}
+                  style={{ textAlign: "center", padding: "2rem 1rem" }}
+                >
                   {copy.noResults}
                 </td>
               </tr>
