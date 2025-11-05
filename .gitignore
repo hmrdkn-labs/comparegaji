@@ -1,3 +1,4 @@
+
 # build output
 dist/
 
@@ -28,3 +29,7 @@ pnpm-debug.log*
 .dev.vars*
 !.dev.vars.example
 !.env.example
+
+# Claude AI settings and documentation
+.claude/
+CLAUDE.md
