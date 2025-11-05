@@ -19,7 +19,7 @@ export const salaryData: SalaryEntry[] = [
   { country: 'Indonesia', band: 'Benchmark', junior: 4875, middle: 8625, senior: 18750, juniorRatio: 1.0, seniorRatio: 1.0 },
   { country: 'Egypt', band: 'Low Band', junior: 6500, middle: 8500, senior: 11500, juniorRatio: 1.3, seniorRatio: 0.6 },
   { country: 'India', band: 'Low Band', junior: 6600, middle: 12000, senior: 24000, juniorRatio: 1.4, seniorRatio: 1.3 },
-  { country: 'Philippines', band: 'Middle Band', junior: 7650, middle: 11700, senior: 19500, juniorRatio: 1.6, seniorRatio: 1.0 },
+  { country: 'Philippines', band: 'Low Band', junior: 7650, middle: 11700, senior: 19500, juniorRatio: 1.6, seniorRatio: 1.0 },
   { country: 'Vietnam', band: 'Middle Band', junior: 10000, middle: 16250, senior: 25000, juniorRatio: 2.1, seniorRatio: 1.3 },
   { country: 'Malaysia', band: 'Middle Band', junior: 12200, middle: 21500, senior: 30000, juniorRatio: 2.5, seniorRatio: 1.6 },
   { country: 'Argentina', band: 'Middle Band', junior: 21000, middle: 34000, senior: 51000, juniorRatio: 4.3, seniorRatio: 2.7 },
