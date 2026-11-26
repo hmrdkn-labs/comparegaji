@@ -13,7 +13,7 @@ import {
   type SeniorityKey,
 } from "../../utils/salary";
 import { buildCsv } from "./csv";
-import { noFigure, sourceLabel } from "./labels";
+import { noFigureShort, shortSourceLabel, tableCaption } from "./labels";
 
 type SortKey = "country" | SeniorityKey;
 
@@ -102,7 +102,8 @@ const SalaryTable = ({ data, currency, cadence, language, copy }: SalaryTablePro
       </div>
 
       <div className="table-wrapper">
-        <table>
+        <table className="sourced-table">
+          <caption>{tableCaption(language)}</caption>
           <thead>
             <tr>
               {columnOrder.map((key) => (
@@ -136,13 +137,13 @@ const SalaryTable = ({ data, currency, cadence, language, copy }: SalaryTablePro
                     <td key={level} style={{ textAlign: "right" }}>
                       {value === null ? (
                         <small className="source-label" data-source-label>
-                          {noFigure[language]}
+                          {noFigureShort[language]}
                         </small>
                       ) : (
                         <>
                           <span data-figure>{formatCurrency(value, currency)}</span>
                           <small className="source-label" data-source-label>
-                            {sourceLabel(market, level, language)}
+                            {shortSourceLabel(market, level)}
                           </small>
                         </>
                       )}

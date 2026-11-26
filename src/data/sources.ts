@@ -9,6 +9,10 @@ export interface Source {
   licence: string;
   licenceUrl: string;
   attribution: string;
+  /** Compact tag for table cells, e.g. "SO 2025". */
+  shortLabel: string;
+  /** One-line citation shown once above a table. */
+  caption: string;
 }
 
 export interface LevelFigure {
@@ -45,6 +49,8 @@ export const sources: Source[] = [
     licence: "ODbL 1.0",
     licenceUrl: "https://opendatacommons.org/licenses/odbl/1-0/",
     attribution: "Data: Stack Overflow Developer Survey 2025, ODbL 1.0",
+    shortLabel: "SO 2025",
+    caption: "Stack Overflow 2025 Developer Survey, fielded May–June 2025, ODbL",
   },
 ];
 
@@ -244,7 +250,7 @@ export function getSource(id: string): Source {
 
 function validate(): void {
   for (const source of sources) {
-    for (const field of ["id", "publisher", "title", "url", "period", "licence", "licenceUrl", "attribution"] as const) {
+    for (const field of ["id", "publisher", "title", "url", "period", "licence", "licenceUrl", "attribution", "shortLabel", "caption"] as const) {
       if (!source[field]) throw new Error(`sources: source "${source.id}" is missing ${field}`);
     }
   }
