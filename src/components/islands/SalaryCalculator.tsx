@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useState } from "react";
-import type { SalaryEntry } from "../../data/salaryData";
+import type { MarketFigure } from "../../data/sources";
 import {
-  convertSalary,
+  convertAnnual,
   getCadenceLabel,
   getCountryWithFlag,
   getSeniorityLabels,
@@ -11,6 +11,7 @@ import {
   type SeniorityKey,
 } from "../../utils/salary";
 import { MIN_MONTHLY_IDR, parseSalary } from "./parseSalary";
+import { fxLabel, levelBasisLabel, noFigure, sourceLabel, userFigureLabel } from "./labels";
 
 const SALARY_KEY = "comparegaji_user_salary";
 const COUNTRIES_KEY = "comparegaji_selected_countries";
@@ -29,7 +30,7 @@ const copy = {
     none: "None",
     parsed: (amount: string) => `Read as ${amount} per month`,
     yours: "Your salary",
-    ratio: "Market ÷ yours",
+    multiple: "Market ÷ yours",
     noMarkets: "Pick at least one market to compare.",
     emptyResult: "Enter your salary to see the comparison.",
     errors: {
@@ -38,7 +39,7 @@ const copy = {
       min: `Salary must be at least Rp${MIN_MONTHLY_IDR.toLocaleString("en-US")} per month.`,
     },
     keptLast: (amount: string) => `Showing the last valid value: ${amount}.`,
-    note: "Indicative only. Market figures are unsourced and under review; rupiah conversion uses a fixed rate of Rp15,500 per USD.",
+    note: "Indicative only, not an offer. Market figures are survey medians of self-reported pay, not a random sample of national developers.",
   },
   id: {
     title: "Bandingkan gajimu dengan level yang sama di luar negeri",
@@ -51,7 +52,7 @@ const copy = {
     none: "Tidak ada",
     parsed: (amount: string) => `Terbaca ${amount} per bulan`,
     yours: "Gajimu",
-    ratio: "Pasar ÷ gajimu",
+    multiple: "Pasar ÷ gajimu",
     noMarkets: "Pilih minimal satu pasar untuk dibandingkan.",
     emptyResult: "Masukkan gajimu untuk melihat perbandingan.",
     errors: {
@@ -60,13 +61,13 @@ const copy = {
       min: `Gaji minimal Rp${MIN_MONTHLY_IDR.toLocaleString("id-ID")} per bulan.`,
     },
     keptLast: (amount: string) => `Menampilkan nilai valid terakhir: ${amount}.`,
-    note: "Hanya indikatif. Angka pasar belum bersumber dan masih ditinjau; konversi rupiah memakai kurs tetap Rp15.500 per USD.",
+    note: "Hanya indikatif, bukan penawaran. Angka pasar adalah median survei dengan gaji yang dilaporkan sendiri, bukan sampel acak pengembang nasional.",
   },
 } as const;
 
 type ErrorKey = keyof (typeof copy)["en"]["errors"];
 
-const DEFAULT_COUNTRIES = ["Singapore"];
+const DEFAULT_COUNTRIES = ["Germany"];
 
 function formatMoney(value: number, currency: CurrencyCode, language: LanguageCode) {
   const number = Math.round(value).toLocaleString(language === "id" ? "id-ID" : "en-US");
@@ -78,11 +79,10 @@ function formatRatio(value: number, language: LanguageCode) {
 }
 
 interface SalaryCalculatorProps {
-  data: SalaryEntry[];
+  data: MarketFigure[];
   currency: CurrencyCode;
   cadence: Cadence;
   language: LanguageCode;
-  exchangeRate: number;
 }
 
 const SalaryCalculator = ({
@@ -90,12 +90,11 @@ const SalaryCalculator = ({
   currency,
   cadence,
   language,
-  exchangeRate,
 }: SalaryCalculatorProps) => {
   const t = copy[language];
   const levelLabels = getSeniorityLabels(language);
   const markets = useMemo(
-    () => data.filter((entry) => entry.country !== "Indonesia").map((e) => e.country),
+    () => data.map((entry) => entry.country),
     [data],
   );
 
@@ -162,22 +161,28 @@ const SalaryCalculator = ({
     persist(COUNTRIES_KEY, JSON.stringify(unique));
   };
 
+  const yours =
+    valid === null ? null : convertAnnual(valid * 12, "IDR", currency, cadence);
+
   const rows = useMemo(() => {
-    if (valid === null) return [];
-    const yours = convertSalary((valid * 12) / exchangeRate, currency, cadence, exchangeRate);
+    if (yours === null) return [];
     return picks
       .map((country) => data.find((entry) => entry.country === country))
-      .filter((entry): entry is SalaryEntry => Boolean(entry))
-      .map((entry) => {
-        const figure = convertSalary(entry[level], currency, cadence, exchangeRate);
-        return { country: entry.country, figure, ratio: figure / yours };
+      .filter((entry): entry is MarketFigure => Boolean(entry))
+      .map((market) => {
+        const point = market.levels[level];
+        const figure = point
+          ? convertAnnual(point.median, market.currency, currency, cadence)
+          : null;
+        return {
+          market,
+          figure,
+          multiple: figure === null ? null : figure / yours,
+          label: sourceLabel(market, level, language),
+        };
       });
-  }, [cadence, currency, data, exchangeRate, level, picks, valid]);
+  }, [cadence, currency, data, language, level, picks, yours]);
 
-  const yours =
-    valid === null
-      ? null
-      : convertSalary((valid * 12) / exchangeRate, currency, cadence, exchangeRate);
   const cadenceLabel = getCadenceLabel(language, cadence);
   const slots = Math.min(picks.length + 1, MAX_MARKETS);
 
@@ -230,13 +235,20 @@ const SalaryCalculator = ({
                 .filter((c) => c === picks[index] || !picks.includes(c))
                 .map((country) => (
                   <option key={country} value={country}>
-                    {getCountryWithFlag(country)}
+                    {getCountryWithFlag(data.find((entry) => entry.country === country)!)}
                   </option>
                 ))}
             </select>
           </div>
         ))}
       </div>
+
+      <p className="calc-note" data-testid="fx-label">
+        {fxLabel(language)}
+      </p>
+      <p className="calc-note" data-testid="level-basis">
+        {levelBasisLabel(language)}
+      </p>
 
       <div id="salary-feedback" aria-live="polite">
         {error && (
@@ -256,22 +268,38 @@ const SalaryCalculator = ({
         <p>{t.noMarkets}</p>
       ) : (
         <div className="comparison-summary calc-results">
-          <div className="summary-card summary-card--negative">
+          <div className="summary-card summary-card--negative" data-figure>
             <strong>{t.yours}</strong>
             <span>{formatMoney(yours ?? 0, currency, language)}</span>
             <p>
               {cadenceLabel} {currency}
             </p>
+            <p className="source-label" data-source-label>
+              {userFigureLabel[language]}
+            </p>
           </div>
           {rows.map((row) => (
-            <div key={row.country} className="summary-card summary-card--positive">
+            <div
+              key={row.market.country}
+              className="summary-card summary-card--positive"
+              data-figure={row.figure === null ? undefined : ""}
+            >
               <strong>
-                {getCountryWithFlag(row.country)} · {levelLabels[level]}
+                {getCountryWithFlag(row.market)} · {levelLabels[level]}
               </strong>
-              <span>{formatMoney(row.figure, currency, language)}</span>
-              <p>
-                {cadenceLabel} {currency} · {t.ratio} {formatRatio(row.ratio, language)}
-              </p>
+              {row.figure === null || row.multiple === null ? (
+                <p data-source-label>{noFigure[language]}</p>
+              ) : (
+                <>
+                  <span>{formatMoney(row.figure, currency, language)}</span>
+                  <p>
+                    {cadenceLabel} {currency} · {t.multiple} {formatRatio(row.multiple, language)}
+                  </p>
+                  <p className="source-label" data-source-label>
+                    {row.label}
+                  </p>
+                </>
+              )}
             </div>
           ))}
         </div>

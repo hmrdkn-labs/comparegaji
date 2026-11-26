@@ -1,11 +1,11 @@
 ---
 import Layout from "../layouts/Layout.astro";
 import SalaryExplorer from "../components/islands/SalaryExplorer";
-import { salaryData } from "../data/salaryData";
+import { markets } from "../data/sources";
 ---
 
 <Layout title="CompareGaji">
   <main class="page-shell">
-    <SalaryExplorer client:load data={salaryData} />
+    <SalaryExplorer client:load data={markets} />
   </main>
 </Layout>
