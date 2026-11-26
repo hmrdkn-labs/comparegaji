@@ -2,7 +2,7 @@
 
 **Live Demo:** [https://comparegaji.pages.dev/](https://comparegaji.pages.dev/)
 
-An Astro site with React islands that visualises Indonesia's tech salary benchmarks against 24 global markets. The bilingual (English/Bahasa Indonesia) experience includes interactive controls and data visualizations optimized for desktop and mobile devices.
+An Astro site with React islands. Enter your rupiah salary and compare it with the same level in other markets; charts and a table show the underlying benchmarks. The bilingual (English/Bahasa Indonesia) experience includes interactive controls and data visualizations optimized for desktop and mobile devices.
 
 ## ✨ Key Features
 
@@ -18,7 +18,7 @@ An Astro site with React islands that visualises Indonesia's tech salary benchma
 
 ## Tech Stack
 
-- [Astro](https://astro.build/) with the Cloudflare adapter
+- [Astro](https://astro.build/), static output, no adapter
 - React islands powered by [`@astrojs/react`](https://docs.astro.build/en/guides/integrations-guide/react/)
 - [Recharts](https://recharts.org/) for both the line and bar visualisations
 
@@ -29,6 +29,8 @@ src/
   components/
     islands/
       SalaryExplorer.tsx
+      SalaryCalculator.tsx   // rupiah salary vs same level abroad
+      parseSalary.js         // pure input parser (15jt, 15.000.000, ...)
       CountryComparisonChart.tsx
       MultiCountryLineChart.tsx
       SalaryTable.tsx
@@ -56,8 +58,9 @@ The dev server runs at `http://localhost:4321`. React islands mount on the clien
 ### Build & Deploy
 
 - `npm run build` – generates the static build
-- `npm run preview` – runs the built output locally via `wrangler dev`
-- `npm run deploy` – bundles and deploys to Cloudflare Workers (requires credentials)
+- `npm run preview` – serves the built output locally with `astro preview`
+- `npm run deploy` – builds, then runs `wrangler pages deploy dist` (manual; needs Cloudflare credentials)
+- `node scripts/test-parse.mjs` – tests the salary input parser
 
 ## Extending The Experience
 
@@ -99,14 +102,9 @@ The salary data represents tech industry benchmarks as of 2024. Data should be p
 
 ## Deployment
 
-This project is deployed on **Cloudflare Pages**:
-
-1. Push to your repository
-2. Connect to Cloudflare Pages
-3. Build command: `npm run build`
-4. Output directory: `dist`
-
-The site automatically deploys on push to the main branch.
+The site is static output (`dist/`) on **Cloudflare Pages**, project `comparegaji`. Deploys are
+manual: run `npm run deploy` (`astro build && wrangler pages deploy dist`) with Cloudflare
+credentials. Nothing deploys on push, and there is no CI or adapter.
 
 ## Contributing
 

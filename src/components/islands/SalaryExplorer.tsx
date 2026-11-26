@@ -1,4 +1,4 @@
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import type { SalaryEntry } from "../../data/salaryData";
 import {
   USD_TO_IDR,
@@ -15,6 +15,7 @@ import {
 import MultiCountryLineChart from "./MultiCountryLineChart";
 import CountryComparisonChart from "./CountryComparisonChart";
 import SalaryTable from "./SalaryTable";
+import SalaryCalculator from "./SalaryCalculator";
 
 interface TranslationShape {
   heroTitle: string;
@@ -306,6 +307,10 @@ const SalaryExplorer = ({
   const [cadence, setCadence] = useState<Cadence>("annual");
   const [language, setLanguage] = useState<LanguageCode>("en");
 
+  useEffect(() => {
+    document.documentElement.lang = language;
+  }, [language]);
+
   const t = translations[language];
   const seniorityLabels = getSeniorityLabels(language);
   const cadenceLabel = getCadenceLabel(language, cadence);
@@ -515,6 +520,14 @@ const SalaryExplorer = ({
           ))}
         </div>
       </section>
+
+      <SalaryCalculator
+        data={data}
+        currency={currency}
+        cadence={cadence}
+        language={language}
+        exchangeRate={exchangeRate}
+      />
 
       <section>
         <div className="section-title">

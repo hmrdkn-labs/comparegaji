@@ -103,6 +103,40 @@ const {
         font-family: inherit;
     }
 
+    .calc-form {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+        gap: 1rem;
+        margin-bottom: 1rem;
+    }
+
+    .calc-form input,
+    .calc-form select {
+        min-height: 44px;
+        width: 100%;
+        padding: 0.5rem 0.75rem;
+        font-size: 1rem;
+        border: 1px solid rgba(17, 17, 17, 0.2);
+        border-radius: 12px;
+        background: var(--color-surface);
+        color: var(--color-text);
+    }
+
+    .calc-form input[aria-invalid="true"] {
+        border-color: #c62828;
+    }
+
+    .calc-error {
+        color: #c62828;
+        margin-bottom: 0.5rem;
+    }
+
+    .calc-parsed,
+    .calc-note {
+        font-size: 0.9rem;
+        margin-bottom: 0.75rem;
+    }
+
     @media (max-width: 720px) {
         body {
             font-size: 15px;
