@@ -2,47 +2,41 @@
 
 **Live Demo:** [https://comparegaji.pages.dev/](https://comparegaji.pages.dev/)
 
-An Astro site with React islands that visualises Indonesia's tech salary benchmarks against 24 global markets. The bilingual (English/Bahasa Indonesia) experience includes interactive controls and data visualizations optimized for desktop and mobile devices.
+An Astro site with React islands. Enter your rupiah salary and compare it with the same level in other markets; charts and a table show the underlying benchmarks. The bilingual (English/Bahasa Indonesia) experience includes interactive controls and data visualizations optimized for desktop and mobile devices.
 
-## ✨ Key Features
+## Features
 
-- **🌍 Multi-currency & cadence support**: Switch between USD/IDR and annual/monthly in real-time
-- **🌐 Bilingual interface**: Full English and Bahasa Indonesia translations
-- **🎌 Country flags**: Visual country identification with Unicode flag emojis
-- **📊 Interactive charts**: 
-  - Multi-country line chart with band/country toggle modes
-  - Color-coded salary bands with shaded min/max ranges
-  - Indonesia vs. any country bar comparison with percentage deltas
-- **📱 Mobile-optimized**: Touch-friendly controls with 44px minimum tap targets
-- **📥 Data export**: Sortable, filterable table with CSV download
+- Rupiah salary in, same level abroad out: type `15jt`, `15.000.000` or `Rp 15 juta`, pick a level and up to three markets.
+- USD/IDR and annual/monthly toggles apply to every figure.
+- Every figure shows its source, period and sample size; the rupiah rate shows its date.
+- English and Bahasa Indonesia.
+- Sortable table of the sourced medians, with a CSV download (UTF-8 BOM, source line, units in the header).
 
 ## Tech Stack
 
-- [Astro](https://astro.build/) with the Cloudflare adapter
+- [Astro](https://astro.build/), static output, no adapter
 - React islands powered by [`@astrojs/react`](https://docs.astro.build/en/guides/integrations-guide/react/)
-- [Recharts](https://recharts.org/) for both the line and bar visualisations
 
 ## Project Layout
 
 ```
 src/
-  components/
-    islands/
-      SalaryExplorer.tsx
-      CountryComparisonChart.tsx
-      MultiCountryLineChart.tsx
-      SalaryTable.tsx
+  components/islands/
+    SalaryExplorer.tsx     // toggles, calculator, table, footer
+    SalaryCalculator.tsx   // rupiah salary vs same level abroad
+    SalaryTable.tsx        // sourced medians, sortable
+    parseSalary.js         // pure input parser (15jt, 15.000.000, ...)
+    labels.ts, csv.ts      // source/FX labels, CSV builder
   data/
-    salaryData.ts        // static benchmark dataset
-  layouts/
-    Layout.astro         // global shell, typography, palette variables
-  pages/
-    index.astro          // renders the SalaryExplorer island within the global layout
-  styles/
-    global.css           // shared tokens and component-level styling
+    sources.ts             // source ledger + sourced figures (validated at build)
+    fx.json                // dated FX snapshot (written by scripts/fx-snapshot.mjs)
+    LICENSE-DATA           // ODbL notice for the data
+  utils/
+    salary.ts, convert.js  // formatting, currency conversion
+scripts/
+  fx-snapshot.mjs          // prebuild: fetch FX from Frankfurter
+  test-parse.mjs, test-convert.mjs
 ```
-
-The dataset lives in `src/data/salaryData.ts` as a typed array of `SalaryEntry`, making it easy to extend or replace with updated figures.
 
 ## Local Development
 
@@ -56,63 +50,24 @@ The dev server runs at `http://localhost:4321`. React islands mount on the clien
 ### Build & Deploy
 
 - `npm run build` – generates the static build
-- `npm run preview` – runs the built output locally via `wrangler dev`
-- `npm run deploy` – bundles and deploys to Cloudflare Workers (requires credentials)
-
-## Extending The Experience
-
-### Adding More Countries
-
-To add more countries, append entries to `src/data/salaryData.ts`:
-
-```typescript
-{
-  country: "Brazil",
-  band: "Middle Band",
-  junior: 35000,
-  middle: 52000,
-  senior: 78000,
-  juniorRatio: 2.5,
-  seniorRatio: 3.1
-}
-```
-
-Don't forget to add the corresponding flag emoji in `src/utils/salary.ts`:
-
-```typescript
-export const countryFlags: Record<string, string> = {
-  // ... existing flags
-  "Brazil": "🇧🇷",
-};
-```
-
-### Customization
-
-- **Regional grouping**: Add grouping logic in `src/utils/salary.ts` and pass into the islands
-- **Chart library**: If swapping Recharts, keep components under `src/components/islands/` to preserve Astro's island architecture
-- **Styling**: Modify design tokens in `src/styles/global.css` (CSS custom properties for colors, shadows, etc.)
-- **Translations**: Extend translation objects in `SalaryExplorer.tsx` for additional languages
+- `npm run preview` – serves the built output locally with `astro preview`
+- `npm run deploy` – builds, then runs `wrangler pages deploy dist` (manual; needs Cloudflare credentials)
+- `node scripts/test-parse.mjs` – tests the salary input parser
+- `node scripts/test-convert.mjs` – tests the currency conversion against `fx.json`
 
 ## Data Sources
 
-The salary data represents tech industry benchmarks as of 2024. Data should be periodically updated to reflect current market conditions.
+Only figures with a named, dated, reusable source are shown. On 2026-11-26 the earlier figures were removed: they had no source record, and neither did the "Indonesia benchmark", the band groupings, or the summary cards.
 
-## Deployment
+- **What is shown:** for 13 markets (India, Brazil, Spain, Czech Rep., Poland, Germany, Australia, France, Canada, United Kingdom, Netherlands, Switzerland, United States), the median gross annual total compensation (salary, bonuses, perks, before tax) of employed professional developers, in USD per year, at up to three levels. The Indonesian side is the number you type; the site holds no Indonesian figures.
+- **Source:** [Stack Overflow Developer Survey 2025](https://survey.stackoverflow.co/2025/) microdata (`results.csv`), fielded 2025-05-29 to 2025-06-23, ODbL 1.0. Stack Overflow converted salaries to USD at the 2025-06-25 rate (`ConvertedCompYearly`). Respondents skew toward engaged Stack Overflow users; this is not a random sample of national developers.
+- **Level rule:** years of professional work experience (`WorkExp`): junior 0–2, middle 3–7, senior 8+. A level needs at least 100 responses; otherwise the site says "no sourced figure for this level". Respondents with a blank `WorkExp` are excluded. Medians are of raw self-reported values, without outlier trimming.
+- **Markets dropped:** 11 of the 24 markets earlier shown (Egypt, Philippines, Vietnam, Malaysia, Argentina, Japan, Mexico, Taiwan, South Korea, Ireland, Singapore) have no level with 100 responses and no source with a usable licence.
+- **FX:** `scripts/fx-snapshot.mjs` fetches [Frankfurter](https://frankfurter.dev/) (USD base) before every build and writes `src/data/fx.json` with its date. If the fetch fails the committed snapshot is kept. The page shows "Rp X per USD, <date>, indicative, not an offer". Rupiah figures are conversions of the USD medians at that rate.
+- **Ledger:** `src/data/sources.ts` holds each source and market. The build throws when a market lacks a resolvable `sourceId`, period, currency or licence.
 
-This project is deployed on **Cloudflare Pages**:
+## Licence
 
-1. Push to your repository
-2. Connect to Cloudflare Pages
-3. Build command: `npm run build`
-4. Output directory: `dist`
-
-The site automatically deploys on push to the main branch.
-
-## Contributing
-
-Contributions are welcome! Please feel free to submit issues or pull requests for:
-- Updated salary data
-- Additional countries
-- UI/UX improvements
-- Bug fixes
-- Translation corrections
+- **Code:** MIT, see [`LICENSE`](LICENSE).
+- **Data:** ODbL 1.0, see [`src/data/LICENSE-DATA`](src/data/LICENSE-DATA). It covers `src/data/sources.ts`, `src/data/*.json` and the CSV export.
+- **Third-party attribution:** Data: Stack Overflow Developer Survey 2025, ODbL 1.0 (https://survey.stackoverflow.co/2025/). Exchange rates: Frankfurter (https://frankfurter.dev/).

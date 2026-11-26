@@ -4,20 +4,21 @@
 	"version": "0.0.1",
 	"scripts": {
 		"dev": "astro dev",
+		"prebuild": "node scripts/fx-snapshot.mjs",
 		"build": "astro build",
 		"preview": "astro preview",
 		"astro": "astro",
-		"deploy": "astro build && wrangler pages deploy dist --project-name=comparegaji"
+		"deploy": "npm run build && wrangler pages deploy dist --project-name=comparegaji"
 	},
 	"dependencies": {
-		"@astrojs/react": "^4.4.1",
-		"astro": "^5.15.3",
+		"@astrojs/react": "^7.1.2",
+		"astro": "^7.4.4",
+		"cookie": "^2.0.1",
 		"react": "^19.2.0",
-		"react-dom": "^19.2.0",
-		"recharts": "^3.3.0"
+		"react-dom": "^19.2.0"
 	},
 	"devDependencies": {
 		"@types/node": "^24.10.0",
-		"wrangler": "^4.45.4"
+		"wrangler": "^4.156.1"
 	}
 }

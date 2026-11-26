@@ -1,44 +1,15 @@
-import type { SalaryEntry, Band } from "../data/salaryData";
+import fx from "../data/fx.json";
+import { convertAnnual as convertAnnualWithRates } from "./convert.js";
+import type { LevelKey, MarketFigure } from "../data/sources";
 
 export const seniorityOrder = ["junior", "middle", "senior"] as const;
 
-export type SeniorityKey = (typeof seniorityOrder)[number];
+export type SeniorityKey = LevelKey;
 export type CurrencyCode = "USD" | "IDR";
 export type Cadence = "annual" | "monthly";
 export type LanguageCode = "en" | "id";
 
-export const bandOrder: Band[] = [
-  "Benchmark",
-  "Low Band",
-  "Middle Band",
-  "High Band",
-  "Top Band",
-];
-
-export const USD_TO_IDR = 15500;
-
-export const bandColors: Record<Band, string> = {
-  Benchmark: "#16A34A",
-  "Low Band": "#2DD36F",
-  "Middle Band": "#2563EB",
-  "High Band": "#1D4ED8",
-  "Top Band": "#F4B400",
-};
-
-export const countryPalette: string[] = [
-  "#ef4444",
-  "#22c55e",
-  "#3b82f6",
-  "#f97316",
-  "#a855f7",
-  "#0ea5e9",
-  "#facc15",
-  "#14b8a6",
-  "#ec4899",
-  "#8b5cf6",
-  "#6366f1",
-  "#fb7185",
-];
+export const fxSnapshot = fx;
 
 const seniorityLabelsByLanguage: Record<
   LanguageCode,
@@ -72,42 +43,8 @@ export const currencyLabels: Record<CurrencyCode, string> = {
   IDR: "IDR",
 };
 
-export const currencySymbols: Record<CurrencyCode, string> = {
-  USD: "$",
-  IDR: "Rp",
-};
-
-export const countryFlags: Record<string, string> = {
-  "United States": "🇺🇸",
-  "United Kingdom": "🇬🇧",
-  Switzerland: "🇨🇭",
-  Singapore: "🇸🇬",
-  Netherlands: "🇳🇱",
-  Ireland: "🇮🇪",
-  Germany: "🇩🇪",
-  France: "🇫🇷",
-  Canada: "🇨🇦",
-  Australia: "🇦🇺",
-  Taiwan: "🇹🇼",
-  "South Korea": "🇰🇷",
-  Japan: "🇯🇵",
-  Spain: "🇪🇸",
-  Poland: "🇵🇱",
-  "Czech Rep.": "🇨🇿",
-  Mexico: "🇲🇽",
-  Brazil: "🇧🇷",
-  Argentina: "🇦🇷",
-  Malaysia: "🇲🇾",
-  Vietnam: "🇻🇳",
-  Indonesia: "🇮🇩",
-  Philippines: "🇵🇭",
-  India: "🇮🇳",
-  Egypt: "🇪🇬",
-};
-
-export function getCountryWithFlag(countryName: string): string {
-  const flag = countryFlags[countryName];
-  return flag ? `${flag} ${countryName}` : countryName;
+export function getCountryWithFlag(market: Pick<MarketFigure, "flag" | "country">): string {
+  return `${market.flag} ${market.country}`;
 }
 
 export function getSeniorityLabels(language: LanguageCode) {
@@ -119,129 +56,26 @@ export function getCadenceLabel(language: LanguageCode, cadence: Cadence) {
   return map[cadence];
 }
 
-export function getCountriesByBand(data: SalaryEntry[], band?: Band | "All") {
-  if (!band || band === "All") {
-    return data;
-  }
-
-  return data.filter((entry) => entry.band === band);
-}
-
-export interface BandDistribution {
-  band: Band;
-  averages: Record<SeniorityKey, number>;
-  minimums: Record<SeniorityKey, number>;
-  maximums: Record<SeniorityKey, number>;
-}
-
-export function getBandDistributions(data: SalaryEntry[]): BandDistribution[] {
-  const result: BandDistribution[] = [];
-
-  for (const band of bandOrder) {
-    const entries = data.filter((entry) => entry.band === band);
-    if (!entries.length) {
-      continue;
-    }
-
-    const averages = { junior: 0, middle: 0, senior: 0 } as Record<
-      SeniorityKey,
-      number
-    >;
-    const minimums = {
-      junior: Number.POSITIVE_INFINITY,
-      middle: Number.POSITIVE_INFINITY,
-      senior: Number.POSITIVE_INFINITY,
-    } as Record<SeniorityKey, number>;
-    const maximums = {
-      junior: Number.NEGATIVE_INFINITY,
-      middle: Number.NEGATIVE_INFINITY,
-      senior: Number.NEGATIVE_INFINITY,
-    } as Record<SeniorityKey, number>;
-
-    for (const level of seniorityOrder) {
-      const values = entries.map((entry) => entry[level]);
-      const total = values.reduce((acc, current) => acc + current, 0);
-      averages[level] = Math.round(total / values.length);
-      minimums[level] = Math.min(...values);
-      maximums[level] = Math.max(...values);
-    }
-
-    result.push({
-      band,
-      averages,
-      minimums,
-      maximums,
-    });
-  }
-
-  return result;
-}
-
-export function getBandDistribution(data: SalaryEntry[], band: Band) {
-  const distributions = getBandDistributions(data);
-  return (
-    distributions.find((distribution) => distribution.band === band) ?? null
-  );
-}
-
-export function convertSalary(
-  valueAnnualUSD: number,
+export function convertAnnual(
+  annualAmount: number,
+  from: string,
   currency: CurrencyCode,
   cadence: Cadence,
-  exchangeRate = USD_TO_IDR,
 ) {
-  let amount = valueAnnualUSD;
-  if (cadence === "monthly") {
-    amount = amount / 12;
-  }
-
-  if (currency === "IDR") {
-    amount = amount * exchangeRate;
-  }
-
-  return amount;
+  return convertAnnualWithRates(annualAmount, from, currency, cadence, fx.rates);
 }
 
 export function formatCurrency(value: number, currency: CurrencyCode) {
   return new Intl.NumberFormat("en-US", {
     style: "currency",
     currency,
-    maximumFractionDigits: currency === "USD" ? 0 : 0,
+    maximumFractionDigits: 0,
   }).format(value);
 }
 
-export function formatAxisValue(value: number, currency: CurrencyCode) {
-  return new Intl.NumberFormat("en-US", {
-    style: "currency",
-    currency,
-    notation: "compact",
-    maximumFractionDigits: 1,
-  }).format(value);
-}
-
-export function colorWithAlpha(hex: string, alpha: number) {
-  const clean = hex.replace("#", "");
-  const bigint = parseInt(clean, 16);
-  const r = (bigint >> 16) & 255;
-  const g = (bigint >> 8) & 255;
-  const b = bigint & 255;
-  return `rgba(${r}, ${g}, ${b}, ${alpha})`;
-}
-
-export function sortByKey<T extends Record<string, unknown>>(
-  data: T[],
-  key: keyof T,
-  direction: "asc" | "desc",
-) {
-  return [...data].sort((a, b) => {
-    const left = a[key];
-    const right = b[key];
-    if (typeof left === "number" && typeof right === "number") {
-      return direction === "asc" ? left - right : right - left;
-    }
-
-    return direction === "asc"
-      ? String(left).localeCompare(String(right))
-      : String(right).localeCompare(String(left));
+export function formatNumber(value: number, language: LanguageCode, digits = 0) {
+  return value.toLocaleString(language === "id" ? "id-ID" : "en-US", {
+    maximumFractionDigits: digits,
+    minimumFractionDigits: digits,
   });
 }

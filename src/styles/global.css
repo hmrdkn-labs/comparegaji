@@ -61,24 +61,6 @@
     margin-top: 1.5rem;
 }
 
-.chart-card {
-    padding-bottom: 2.25rem;
-}
-
-.chart-header {
-    display: flex;
-    flex-wrap: wrap;
-    justify-content: space-between;
-    align-items: flex-start;
-    gap: 1rem;
-    margin-bottom: 1.5rem;
-}
-
-.chart-header strong {
-    font-weight: 600;
-    color: var(--color-text);
-}
-
 .view-toggle {
     display: inline-flex;
     align-items: center;
@@ -142,132 +124,6 @@
     text-transform: uppercase;
 }
 
-.band-toggle {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 0.5rem;
-    align-items: center;
-}
-
-.band-toggle button {
-    border-radius: 999px;
-    border: 1px solid transparent;
-    padding: 0.6rem 1rem;
-    min-height: 44px;
-    font-weight: 600;
-    cursor: pointer;
-    background: rgba(17, 17, 17, 0.06);
-    transition:
-        transform 120ms ease,
-        box-shadow 160ms ease;
-}
-
-.band-toggle button[aria-pressed="true"] {
-    color: #fff;
-    box-shadow: 0 8px 16px rgba(17, 17, 17, 0.12);
-}
-
-.band-toggle[aria-disabled="true"] button {
-    cursor: not-allowed;
-    opacity: 0.5;
-}
-
-.band-helper {
-    font-size: 0.85rem;
-    color: var(--color-subtle-text);
-    margin-left: auto;
-}
-
-.pill-select {
-    display: inline-flex;
-    align-items: center;
-    gap: 0.5rem;
-    padding: 0.55rem 0.85rem;
-    background: rgba(66, 133, 244, 0.08);
-    border-radius: 999px;
-    border: 1px solid rgba(66, 133, 244, 0.16);
-    font-size: 0.95rem;
-}
-
-.pill-select select {
-    border: none;
-    background: transparent;
-    font-size: inherit;
-    color: inherit;
-    font-weight: 600;
-    padding-right: 1.4rem;
-    appearance: none;
-    cursor: pointer;
-}
-
-.pill-select--wide select {
-    min-width: 200px;
-}
-
-.pill-select select:focus {
-    outline: none;
-}
-
-.pill-select::after {
-    content: "v";
-    font-size: 0.7rem;
-    opacity: 0.6;
-}
-
-.country-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
-    gap: 0.6rem;
-    border: 1px solid rgba(17, 17, 17, 0.08);
-    padding: 0.85rem;
-    border-radius: 16px;
-    background: rgba(17, 17, 17, 0.02);
-    max-height: 280px;
-    overflow-y: auto;
-}
-
-.country-grid[data-disabled="true"] {
-    opacity: 0.55;
-    pointer-events: none;
-}
-
-.country-chip {
-    display: inline-flex;
-    align-items: center;
-    gap: 0.4rem;
-    padding: 0.6rem 0.85rem;
-    min-height: 44px;
-    border-radius: 12px;
-    background: #f7f7f7;
-    border: 1px solid rgba(17, 17, 17, 0.06);
-    font-size: 0.9rem;
-    cursor: pointer;
-    transition:
-        background 120ms ease,
-        transform 120ms ease;
-}
-
-.country-chip[data-active="true"] {
-    background: rgba(15, 157, 88, 0.16);
-    border-color: rgba(15, 157, 88, 0.4);
-}
-
-.country-chip input {
-    accent-color: var(--color-accent-green);
-}
-
-.chart-wrapper {
-    width: 100%;
-    min-height: 360px;
-    position: relative;
-}
-
-.chart-footnote {
-    margin-top: 1.25rem;
-    font-size: 0.85rem;
-    color: var(--color-subtle-text);
-}
-
 .comparison-summary {
     display: grid;
     grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
@@ -306,14 +162,6 @@
 
 .summary-card--negative {
     background: rgba(66, 133, 244, 0.16);
-}
-
-.summary-card--hero {
-    background: rgba(66, 133, 244, 0.16);
-}
-
-.hero-summary {
-    margin-top: 2rem;
 }
 
 .hero-controls {
@@ -428,29 +276,6 @@ tbody tr:hover {
     background: rgba(66, 133, 244, 0.06);
 }
 
-tbody tr[data-country="Indonesia"] {
-    background: rgba(15, 157, 88, 0.12);
-    position: relative;
-}
-
-tbody tr[data-country="Indonesia"] td:first-child::before {
-    content: "•";
-    color: var(--color-accent-green);
-    margin-right: 0.45rem;
-}
-
-.ratio-pill {
-    display: inline-flex;
-    align-items: center;
-    gap: 0.35rem;
-    padding: 0.2rem 0.6rem;
-    border-radius: 999px;
-    background: rgba(15, 157, 88, 0.16);
-    font-size: 0.85rem;
-    font-weight: 600;
-    color: var(--color-text);
-}
-
 .visually-hidden {
     position: absolute;
     width: 1px;
@@ -467,10 +292,6 @@ tbody tr[data-country="Indonesia"] td:first-child::before {
     .hero-card {
         padding: 2.2rem 2.2rem;
     }
-
-    .chart-card {
-        padding: 1.5rem;
-    }
 }
 
 @media (max-width: 600px) {
@@ -478,17 +299,8 @@ tbody tr[data-country="Indonesia"] td:first-child::before {
         padding: 2.5rem 1.1rem 3rem;
     }
 
-    .chart-header {
-        flex-direction: column;
-        align-items: stretch;
-    }
-
     .view-toggle {
         align-self: flex-start;
-    }
-
-    .country-grid {
-        grid-template-columns: repeat(auto-fill, minmax(130px, 1fr));
     }
 
     .table-controls {
@@ -501,35 +313,9 @@ tbody tr[data-country="Indonesia"] td:first-child::before {
     .hero-controls .filter-group {
         width: 100%;
     }
-
-    .band-toggle {
-        width: 100%;
-    }
-
-    .band-toggle button {
-        flex: 1 1 calc(50% - 0.5rem);
-        justify-content: center;
-    }
 }
 
 @media (max-width: 400px) {
-    .pill-select--wide select {
-        min-width: unset;
-        width: 100%;
-    }
-
-    .pill-select {
-        width: 100%;
-    }
-
-    .chart-wrapper {
-        min-height: 300px;
-    }
-
-    .country-grid {
-        grid-template-columns: 1fr;
-        max-height: 240px;
-    }
 
     .comparison-summary {
         grid-template-columns: 1fr;
@@ -542,11 +328,6 @@ tbody tr[data-country="Indonesia"] td:first-child::before {
 
     .filter-group {
         width: 100%;
-    }
-
-    .band-helper {
-        margin-left: 0;
-        margin-top: 0.5rem;
     }
 }
 

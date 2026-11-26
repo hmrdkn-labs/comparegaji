@@ -1,0 +1,27 @@
+CompareGaji data licence: Open Database License (ODbL) 1.0
+
+This notice covers the data in this repository and the data the site exports:
+  - src/data/sources.ts (the sourced salary figures and the source ledger)
+  - src/data/*.json (including the FX snapshot fx.json)
+  - the CSV file downloaded from the site
+
+The code in this repository is not covered by this notice; it is MIT (see
+/LICENSE).
+
+The salary figures are medians derived from the Stack Overflow Developer Survey
+2025, which Stack Overflow publishes under the ODbL 1.0
+(https://survey.stackoverflow.co/2025/). Under the ODbL you must:
+  - Attribute: credit "Data: Stack Overflow Developer Survey 2025, ODbL 1.0"
+    for any public use of this data or works produced from it.
+  - Share-Alike: offer any adapted version of this database under the ODbL.
+  - Keep open: not apply technical measures that restrict what the ODbL allows.
+
+Official licence text: https://opendatacommons.org/licenses/odbl/1-0/
+Human-readable summary:  https://opendatacommons.org/licenses/odbl/summary/
+
+Exchange rates in fx.json come from Frankfurter (https://frankfurter.dev/) and
+remain subject to the terms of the central banks that publish them; they are
+indicative only. The rate is included for convenience and is not an offer.
+
+This is a notice that points to the official ODbL 1.0 text; it is not a
+replacement for it and is not legal advice.
