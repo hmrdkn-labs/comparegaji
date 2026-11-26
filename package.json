@@ -4,10 +4,11 @@
 	"version": "0.0.1",
 	"scripts": {
 		"dev": "astro dev",
+		"prebuild": "node scripts/fx-snapshot.mjs",
 		"build": "astro build",
 		"preview": "astro preview",
 		"astro": "astro",
-		"deploy": "astro build && wrangler pages deploy dist --project-name=comparegaji"
+		"deploy": "npm run build && wrangler pages deploy dist --project-name=comparegaji"
 	},
 	"dependencies": {
 		"@astrojs/react": "^7.1.2",
